@@ -62,13 +62,17 @@
         "symfony/polyfill-php82": "*"
     },
     "scripts": {
-        "auto-scripts": [
-        ],
+        "auto-scripts": [],
         "post-install-cmd": [
             "@auto-scripts"
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "setup": [
+            "@php -r \"is_dir('var') || mkdir('var', 0755, true);\"",
+            "@php bin/console doctrine:migrations:migrate --no-interaction",
+            "@php bin/console cache:warmup"
         ]
     },
     "conflict": {
