@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\ExerciseLog;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,47 +14,15 @@ class ExerciseLogRepository extends ServiceEntityRepository
         parent::__construct($registry, ExerciseLog::class);
     }
 
-    public function findProgressionForExercise(string $exerciseName, int $limit = 30): array
-    {
-        return $this->createQueryBuilder('e')
-            ->join('e.session', 's')
-            ->select('e.setNumber, e.reps, e.weightKg, s.date, s.type')
-            ->where('e.exerciseName = :name')
-            ->setParameter('name', $exerciseName)
-            ->orderBy('s.date', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getArrayResult();
-    }
-
-    public function findAllExerciseNames(): array
-    {
-        $result = $this->createQueryBuilder('e')
-            ->select('DISTINCT e.exerciseName')
-            ->orderBy('e.exerciseName', 'ASC')
-            ->getQuery()
-            ->getArrayResult();
-
-        return array_column($result, 'exerciseName');
-    }
-
-    public function findMaxWeightPerExercise(): array
-    {
-        return $this->createQueryBuilder('e')
-            ->select('e.exerciseName, MAX(e.weightKg) as maxWeight, MAX(e.reps) as maxReps')
-            ->groupBy('e.exerciseName')
-            ->orderBy('e.exerciseName', 'ASC')
-            ->getQuery()
-            ->getArrayResult();
-    }
-
-    public function findProgressionChartData(string $exerciseName): array
+    public function findProgressionChartDataForUser(string $exerciseName, User $user): array
     {
         $rows = $this->createQueryBuilder('e')
             ->join('e.session', 's')
             ->select('s.date, MAX(e.weightKg) as maxWeight, MAX(e.reps) as maxReps')
             ->where('e.exerciseName = :name')
+            ->andWhere('s.user = :user')
             ->setParameter('name', $exerciseName)
+            ->setParameter('user', $user)
             ->groupBy('s.date')
             ->orderBy('s.date', 'ASC')
             ->getQuery()
@@ -64,5 +33,32 @@ class ExerciseLogRepository extends ServiceEntityRepository
             'maxWeight' => (float) $r['maxWeight'],
             'maxReps'   => (int) $r['maxReps'],
         ], $rows);
+    }
+
+    public function findAllExerciseNamesForUser(User $user): array
+    {
+        $result = $this->createQueryBuilder('e')
+            ->join('e.session', 's')
+            ->select('DISTINCT e.exerciseName')
+            ->where('s.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('e.exerciseName', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_column($result, 'exerciseName');
+    }
+
+    public function findMaxWeightPerExerciseForUser(User $user): array
+    {
+        return $this->createQueryBuilder('e')
+            ->join('e.session', 's')
+            ->select('e.exerciseName, MAX(e.weightKg) as maxWeight, MAX(e.reps) as maxReps')
+            ->where('s.user = :user')
+            ->setParameter('user', $user)
+            ->groupBy('e.exerciseName')
+            ->orderBy('e.exerciseName', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
     }
 }

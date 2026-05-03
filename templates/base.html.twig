@@ -166,10 +166,13 @@ body {
 <body>
 
 <nav class="nav">
-  <span class="nav-brand">LUKAS</span>
-  <a href="{{ path('app_plan') }}"      class="nav-link {% if app.request.attributes.get('_route') == 'app_plan' %}active{% endif %}">Plan</a>
-  <a href="{{ path('app_log') }}"       class="nav-link {% if app.request.attributes.get('_route') starts with 'app_log' %}active{% endif %}">Loggen</a>
-  <a href="{{ path('app_dashboard') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">Dashboard</a>
+  <span class="nav-brand">{{ app.user ? app.user.username|upper : 'TRAINING' }}</span>
+  {% if app.user %}
+    <a href="{{ path('app_plan') }}"      class="nav-link {% if app.request.attributes.get('_route') == 'app_plan' or app.request.attributes.get('_route') == 'app_plan_edit' %}active{% endif %}">Plan</a>
+    <a href="{{ path('app_log') }}"       class="nav-link {% if app.request.attributes.get('_route') starts with 'app_log' %}active{% endif %}">Loggen</a>
+    <a href="{{ path('app_dashboard') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="{{ path('app_logout') }}"    class="nav-link" style="margin-left:4px;color:var(--muted)">↩</a>
+  {% endif %}
 </nav>
 
 {% block body %}{% endblock %}

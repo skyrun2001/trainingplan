@@ -15,24 +15,25 @@ class DashboardController extends AbstractController
     #[Route('/dashboard', name: 'app_dashboard')]
     public function index(
         WorkoutSessionRepository $sessionRepo,
-        ExerciseLogRepository $exerciseRepo
+        ExerciseLogRepository    $exerciseRepo
     ): Response {
-        $recentSessions = $sessionRepo->findRecent(30);
-        $streak         = $sessionRepo->getCurrentStreak();
-        $countByType    = $sessionRepo->countByType();
-        $personalBests  = $exerciseRepo->findMaxWeightPerExercise();
+        $user           = $this->getUser();
+        $recentSessions = $sessionRepo->findRecentForUser($user, 30);
+        $streak         = $sessionRepo->getCurrentStreakForUser($user);
+        $countByType    = $sessionRepo->countByTypeForUser($user);
+        $personalBests  = $exerciseRepo->findMaxWeightPerExerciseForUser($user);
 
         $typeMap = [];
         foreach ($countByType as $row) {
             $typeMap[$row['type']] = $row['cnt'];
         }
 
-        $last4Weeks = $sessionRepo->findByDateRange(
+        $last4Weeks  = $sessionRepo->findByDateRangeAndUser(
             new \DateTime('-28 days'),
-            new \DateTime()
+            new \DateTime(),
+            $user
         );
-
-        $weeklyData = $this->buildWeeklyData($last4Weeks);
+        $weeklyData  = $this->buildWeeklyData($last4Weeks);
 
         return $this->render('dashboard/index.html.twig', [
             'sessions'      => $recentSessions,
@@ -41,34 +42,31 @@ class DashboardController extends AbstractController
             'totalSessions' => array_sum(array_column($countByType, 'cnt')),
             'personalBests' => $personalBests,
             'weeklyData'    => $weeklyData,
-            'exerciseNames' => $exerciseRepo->findAllExerciseNames(),
+            'exerciseNames' => $exerciseRepo->findAllExerciseNamesForUser($user),
         ]);
     }
 
     #[Route('/api/progression/{exerciseName}', name: 'api_progression')]
-    public function progression(
-        string $exerciseName,
-        ExerciseLogRepository $repo
-    ): JsonResponse {
-        $data = $repo->findProgressionChartData(urldecode($exerciseName));
+    public function progression(string $exerciseName, ExerciseLogRepository $repo): JsonResponse
+    {
+        $data = $repo->findProgressionChartDataForUser(
+            urldecode($exerciseName),
+            $this->getUser()
+        );
         return $this->json($data);
     }
 
     #[Route('/api/history', name: 'api_history')]
-    public function history(
-        Request $request,
-        WorkoutSessionRepository $repo
-    ): JsonResponse {
+    public function history(Request $request, WorkoutSessionRepository $repo): JsonResponse
+    {
         $limit    = min((int) $request->query->get('limit', 10), 50);
-        $sessions = $repo->findRecent($limit);
+        $sessions = $repo->findRecentForUser($this->getUser(), $limit);
 
         $data = array_map(function ($s) {
             $logs = [];
             foreach ($s->getExerciseLogs() as $log) {
                 $key = $log->getExerciseName();
-                if (!isset($logs[$key])) {
-                    $logs[$key] = [];
-                }
+                if (!isset($logs[$key])) $logs[$key] = [];
                 $logs[$key][] = [
                     'set'    => $log->getSetNumber(),
                     'reps'   => $log->getReps(),
@@ -76,16 +74,15 @@ class DashboardController extends AbstractController
                     'rpe'    => $log->getRpe(),
                 ];
             }
-
             return [
-                'id'       => $s->getId(),
-                'date'     => $s->getDate()->format('d.m.Y'),
-                'type'     => $s->getType(),
-                'label'    => $s->getTypeLabel(),
-                'color'    => $s->getTypeColor(),
-                'duration' => $s->getDurationMinutes(),
-                'notes'    => $s->getNotes(),
-                'exercises'=> $logs,
+                'id'        => $s->getId(),
+                'date'      => $s->getDate()->format('d.m.Y'),
+                'type'      => $s->getType(),
+                'label'     => $s->getTypeLabel(),
+                'color'     => $s->getTypeColor(),
+                'duration'  => $s->getDurationMinutes(),
+                'notes'     => $s->getNotes(),
+                'exercises' => $logs,
             ];
         }, $sessions);
 
@@ -97,17 +94,14 @@ class DashboardController extends AbstractController
         $weeks = [];
         for ($i = 3; $i >= 0; $i--) {
             $start = new \DateTime("-{$i} weeks monday this week");
-            $end   = clone $start;
-            $end->modify('+6 days');
-            $label = 'KW '.$start->format('W');
-            $weeks[$label] = ['label' => $label, 'count' => 0, 'types' => []];
+            $label = 'KW ' . $start->format('W');
+            $weeks[$label] = ['label' => $label, 'count' => 0];
         }
 
         foreach ($sessions as $s) {
-            $kw = 'KW '.$s->getDate()->format('W');
+            $kw = 'KW ' . $s->getDate()->format('W');
             if (isset($weeks[$kw])) {
                 $weeks[$kw]['count']++;
-                $weeks[$kw]['types'][] = $s->getType();
             }
         }
 

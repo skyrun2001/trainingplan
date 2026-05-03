@@ -32,6 +32,10 @@ class WorkoutSession
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'workoutSessions')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $user = null;
+
     #[ORM\OneToMany(targetEntity: ExerciseLog::class, mappedBy: 'session', cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['exerciseName' => 'ASC', 'setNumber' => 'ASC'])]
     private Collection $exerciseLogs;
@@ -52,6 +56,9 @@ class WorkoutSession
 
     public function getDurationMinutes(): ?int { return $this->durationMinutes; }
     public function setDurationMinutes(?int $d): static { $this->durationMinutes = $d; return $this; }
+
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getNotes(): ?string { return $this->notes; }
     public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }
