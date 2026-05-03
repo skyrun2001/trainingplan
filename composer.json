@@ -67,6 +67,7 @@
             "@auto-scripts"
         ],
         "setup": [
+            "@composer install --no-interaction",
             "@php -r \"is_dir('var') || mkdir('var', 0755, true);\"",
             "@php bin/console doctrine:migrations:migrate --no-interaction",
             "@php bin/console cache:warmup"
