@@ -315,9 +315,12 @@
 
     {# Autocomplete sections datalist #}
     <datalist id="sections-{{ day.id }}">
-      {% set sections = day.exercises|map(e => e.section)|unique %}
-      {% for s in sections %}
-        <option value="{{ s }}">
+      {% set seenSections = [] %}
+      {% for ex in day.exercises %}
+        {% if ex.section not in seenSections %}
+          <option value="{{ ex.section }}">
+          {% set seenSections = seenSections|merge([ex.section]) %}
+        {% endif %}
       {% endfor %}
     </datalist>
 
