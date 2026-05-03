@@ -1,0 +1,269 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Trainingsplan – Lukas{% endblock %}
+
+{% block head %}
+<style>
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.day { display: none; padding: 0 20px; max-width: 680px; margin: 0 auto; }
+.day.active { display: block; }
+.tips-section { display: none; padding: 0 20px; max-width: 680px; margin: 0 auto; }
+.tips-section.active { display: block; }
+
+.day-header {
+  margin: 8px 0 20px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.day-title { font-size: 20px; font-weight: 700; color: var(--accent); }
+.day-focus { font-size: 13px; color: var(--dim); margin-top: 4px; }
+
+.exercise {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ex-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 24px;
+  margin-top: 2px;
+}
+.ex-body { flex: 1; min-width: 0; }
+.ex-name { font-size: 15px; font-weight: 600; line-height: 1.3; }
+.ex-sets {
+  font-size: 13px;
+  color: var(--dim);
+  margin-top: 4px;
+  font-family: 'Space Mono', monospace;
+}
+.ex-progression {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+  background: rgba(247,127,0,0.1);
+  color: var(--warn);
+  border: 1px solid rgba(247,127,0,0.2);
+}
+.ex-new {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 24px 0 10px;
+}
+.note {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px dashed rgba(255,255,255,0.1);
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.6;
+}
+.tip-card {
+  margin-bottom: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.tip-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--push);
+  margin-bottom: 6px;
+}
+.tip-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.tip-text { font-size: 13px; color: var(--dim); line-height: 1.6; }
+
+.start-btn {
+  padding: 8px 14px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.start-btn:hover { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="tabs" id="tabs">
+  <button class="tab active" data-day="push"  style="--accent:#C9184A">Push</button>
+  <button class="tab"        data-day="pull"  style="--accent:#2D6A4F">Pull</button>
+  <button class="tab"        data-day="legs"  style="--accent:#E09F3E">Beine</button>
+  <button class="tab"        data-day="upper" style="--accent:#4361EE">Upper</button>
+  <button class="tab"        data-day="tips"  style="--accent:#F77F00">Tipps</button>
+</div>
+
+<!-- PUSH -->
+<div class="day active" id="day-push" style="--accent:#C9184A">
+  <div class="day-header">
+    <div>
+      <div class="day-title">Push — Brust, Schulter, Trizeps</div>
+      <div class="day-focus">Schwerer Tag · 6 Übungen · ~60 Min</div>
+    </div>
+    <a href="{{ path('app_log', {type:'push'}) }}" class="start-btn">▶ Starten</a>
+  </div>
+  <div class="section-title">Aufwärmen</div>
+  <div class="exercise"><div class="ex-num">0</div><div class="ex-body"><div class="ex-name">Crosstrainer</div><div class="ex-sets">10 Min · locker</div></div></div>
+  <div class="section-title">Hauptteil</div>
+  <div class="exercise"><div class="ex-num">1</div><div class="ex-body"><div class="ex-name">Langhantel Bankdrücken</div><div class="ex-sets">4 Sätze · 6–8 Wdh · 65 kg</div><span class="ex-progression">↑ steigern auf 70 kg</span></div></div>
+  <div class="exercise"><div class="ex-num">2</div><div class="ex-body"><div class="ex-name">Plate Loaded Schulterdrücken</div><div class="ex-sets">4 Sätze · 8–10 Wdh · 35 kg</div><span class="ex-progression">↑ Gewicht hoch</span></div></div>
+  <div class="exercise"><div class="ex-num">3</div><div class="ex-body"><div class="ex-name">Maschine Brustpresse</div><div class="ex-sets">3 Sätze · 10 Wdh · 70 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">4</div><div class="ex-body"><div class="ex-name">Kurzhantel Seitheben</div><div class="ex-sets">4 Sätze · 12–15 Wdh · 12,5 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">5</div><div class="ex-body"><div class="ex-name">Seilzug Trizepsdrücken</div><div class="ex-sets">3 Sätze · 10–12 Wdh · 27,5 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">6</div><div class="ex-body"><div class="ex-name">Seilzug Trizeps über Kopf</div><div class="ex-sets">3 Sätze · 10–12 Wdh · 15 kg</div><span class="ex-progression">↑ deutlich erhöhen</span></div></div>
+  <div class="note">💡 Streichen: Seilzug Brustpresse schräg + Seilzug Butterfly nach unten — Brust ist mit Bankdrücken + Brustpresse + Plate-Schulterdrücken ausreichend gereizt.</div>
+</div>
+
+<!-- PULL -->
+<div class="day" id="day-pull" style="--accent:#2D6A4F">
+  <div class="day-header">
+    <div>
+      <div class="day-title">Pull — Rücken, Bizeps</div>
+      <div class="day-focus">Schwerer Tag · 7 Übungen · ~65 Min</div>
+    </div>
+    <a href="{{ path('app_log', {type:'pull'}) }}" class="start-btn">▶ Starten</a>
+  </div>
+  <div class="section-title">Aufwärmen</div>
+  <div class="exercise"><div class="ex-num">0</div><div class="ex-body"><div class="ex-name">Crosstrainer</div><div class="ex-sets">10 Min · locker</div></div></div>
+  <div class="section-title">Hauptteil</div>
+  <div class="exercise"><div class="ex-num">1</div><div class="ex-body"><div class="ex-name">Klimmzug (oder Latzug breit)</div><div class="ex-sets">4 Sätze · 6–10 Wdh · KG / 75 kg</div><span class="ex-progression ex-new">NEU statt 3 Latzug-Varianten</span></div></div>
+  <div class="exercise"><div class="ex-num">2</div><div class="ex-body"><div class="ex-name">Langhantel Rudern vorgebeugt</div><div class="ex-sets">4 Sätze · 8 Wdh · 75 kg</div><span class="ex-progression">↑ schwerer trainieren</span></div></div>
+  <div class="exercise"><div class="ex-num">3</div><div class="ex-body"><div class="ex-name">Latzug neutraler Griff</div><div class="ex-sets">3 Sätze · 10–12 Wdh · 60 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">4</div><div class="ex-body"><div class="ex-name">Maschine Rudern</div><div class="ex-sets">3 Sätze · 10–12 Wdh · 55 kg</div><span class="ex-progression">↑ von 45 kg hoch</span></div></div>
+  <div class="exercise"><div class="ex-num">5</div><div class="ex-body"><div class="ex-name">Reverse Butterfly / Face Pulls</div><div class="ex-sets">3 Sätze · 12–15 Wdh · 52 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">6</div><div class="ex-body"><div class="ex-name">Langhantel Bizeps-Curls</div><div class="ex-sets">3 Sätze · 8–10 Wdh · 30 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">7</div><div class="ex-body"><div class="ex-name">Hammer Curls Kurzhantel</div><div class="ex-sets">3 Sätze · 10–12 Wdh · 16 kg</div></div></div>
+  <div class="note">💡 Streichen: Doppelte Latzug-Varianten + Seilzug Überzüge. Klimmzüge ersetzen die meisten Lat-Übungen, Bizeps-Volumen reicht mit 2 Übungen.</div>
+</div>
+
+<!-- LEGS -->
+<div class="day" id="day-legs" style="--accent:#E09F3E">
+  <div class="day-header">
+    <div>
+      <div class="day-title">Beine — Komplett</div>
+      <div class="day-focus">Schwerster Tag · 7 Übungen · ~70 Min</div>
+    </div>
+    <a href="{{ path('app_log', {type:'legs'}) }}" class="start-btn">▶ Starten</a>
+  </div>
+  <div class="section-title">Aufwärmen</div>
+  <div class="exercise"><div class="ex-num">0</div><div class="ex-body"><div class="ex-name">Crosstrainer</div><div class="ex-sets">10 Min · locker</div></div></div>
+  <div class="section-title">Hauptteil</div>
+  <div class="exercise"><div class="ex-num">1</div><div class="ex-body"><div class="ex-name">Hackenschmidt Kniebeuge</div><div class="ex-sets">4 Sätze · 8 Wdh · 50 kg</div><span class="ex-progression">↑ von 35 kg hoch</span></div></div>
+  <div class="exercise"><div class="ex-num">2</div><div class="ex-body"><div class="ex-name">Rumänisches Kreuzheben (RDL)</div><div class="ex-sets">4 Sätze · 8–10 Wdh · 70 kg</div><span class="ex-progression ex-new">NEU — Hüftstreckung!</span></div></div>
+  <div class="exercise"><div class="ex-num">3</div><div class="ex-body"><div class="ex-name">Beinpresse 45°</div><div class="ex-sets">3 Sätze · 10–12 Wdh · 180 kg</div><span class="ex-progression">↑ steigern</span></div></div>
+  <div class="exercise"><div class="ex-num">4</div><div class="ex-body"><div class="ex-name">Maschine Beinbeuger</div><div class="ex-sets">3 Sätze · 12 Wdh · 60 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">5</div><div class="ex-body"><div class="ex-name">Bulgarian Splits</div><div class="ex-sets">3 Sätze · 10 Wdh · 17,5 kg</div><span class="ex-progression">↑ von 10 kg hoch</span></div></div>
+  <div class="exercise"><div class="ex-num">6</div><div class="ex-body"><div class="ex-name">Wadenpresse sitzend</div><div class="ex-sets">4 Sätze · 15 Wdh · 130 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">7</div><div class="ex-body"><div class="ex-name">Adduktor / Abduktor Superset</div><div class="ex-sets">2 Sätze · 15 Wdh · 130 kg (Finisher)</div></div></div>
+  <div class="note">💡 RDL ist die wichtigste Ergänzung — trifft Hamstrings, Glutes und unteren Rücken. Beinstrecker streichen.</div>
+</div>
+
+<!-- UPPER -->
+<div class="day" id="day-upper" style="--accent:#4361EE">
+  <div class="day-header">
+    <div>
+      <div class="day-title">Upper — Schwachpunkte</div>
+      <div class="day-focus">Leichterer Tag · Schultern + Arme · ~50 Min</div>
+    </div>
+    <a href="{{ path('app_log', {type:'upper'}) }}" class="start-btn">▶ Starten</a>
+  </div>
+  <div class="section-title">Aufwärmen</div>
+  <div class="exercise"><div class="ex-num">0</div><div class="ex-body"><div class="ex-name">Crosstrainer</div><div class="ex-sets">10 Min · locker</div></div></div>
+  <div class="section-title">Hauptteil — Volumen für Schultern</div>
+  <div class="exercise"><div class="ex-num">1</div><div class="ex-body"><div class="ex-name">Kurzhantel Schulterdrücken</div><div class="ex-sets">4 Sätze · 8–10 Wdh · 17,5 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">2</div><div class="ex-body"><div class="ex-name">Maschine Seitheben</div><div class="ex-sets">4 Sätze · 12–15 Wdh · 32 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">3</div><div class="ex-body"><div class="ex-name">Face Pulls Seilzug</div><div class="ex-sets">3 Sätze · 15 Wdh · leicht</div><span class="ex-progression ex-new">NEU für hintere Schulter</span></div></div>
+  <div class="section-title">Arme + Schrägbank</div>
+  <div class="exercise"><div class="ex-num">4</div><div class="ex-body"><div class="ex-name">Schrägbank Kurzhantel Bankdrücken</div><div class="ex-sets">3 Sätze · 10 Wdh · 22,5 kg</div></div></div>
+  <div class="exercise"><div class="ex-num">5</div><div class="ex-body"><div class="ex-name">Klimmzug eng / Latzug eng</div><div class="ex-sets">3 Sätze · 8–10 Wdh</div></div></div>
+  <div class="exercise"><div class="ex-num">6</div><div class="ex-body"><div class="ex-name">Bizeps + Trizeps Superset</div><div class="ex-sets">3 Sätze · 10–12 Wdh je</div></div></div>
+  <div class="note">💡 Fokus auf Schultern (deine Schwachstelle) und gezielten Reiz für ästhetische Punkte. Weniger Übungen, mehr Intensität pro Übung.</div>
+</div>
+
+<!-- TIPS -->
+<div class="tips-section" id="day-tips" style="--accent:#F77F00">
+  <div class="day-header" style="--accent:#F77F00"><div><div class="day-title">Allgemeine Verbesserungen</div><div class="day-focus">Was du sofort umsetzen kannst</div></div></div>
+  <div class="tip-card"><div class="tip-num">01 · ERNÄHRUNG</div><div class="tip-title">Mahlzeiten umverteilen</div><div class="tip-text">Aktuell: Abendessen 34 % deiner Kalorien. Besser: Mittagessen 35 %, Abendessen 25 %. Mehr Energie tagsüber für Training, leichtere Verdauung für Schlaf.</div></div>
+  <div class="tip-card"><div class="tip-num">02 · ERNÄHRUNG</div><div class="tip-title">Gemüse & Obst täglich</div><div class="tip-text">In deiner App: 0 % Gemüse/Obst, 48 % aus Brot + Küchenschrank. Mindestens 2 Hände Gemüse pro Tag — bringt Mikronährstoffe für Regeneration und Muskelaufbau.</div></div>
+  <div class="tip-card"><div class="tip-num">03 · ERNÄHRUNG</div><div class="tip-title">Wasser konstanter</div><div class="tip-text">Aktuell starke Schwankungen (4L → 0L). Ziel: 3L pro Tag konstant. Eine 1,5L-Flasche morgens füllen, mittags nochmal — dann passt es.</div></div>
+  <div class="tip-card"><div class="tip-num">04 · TRAINING</div><div class="tip-title">Volumen reduzieren</div><div class="tip-text">Aktuell 9–10 Übungen pro Einheit ist zu viel. 6–7 Übungen mit höherer Intensität (RIR 1–2 = nahe Versagen) bringen mehr Reiz und bessere Erholung.</div></div>
+  <div class="tip-card"><div class="tip-num">05 · TRAINING</div><div class="tip-title">Wiederholungsbereich variieren</div><div class="tip-text">Du trainierst fast alles bei 12–15 Wdh. Grundübungen besser bei 6–8 Wdh (Kraft), Hauptübungen 8–12 (Hypertrophie), Isolation 12–15.</div></div>
+  <div class="tip-card"><div class="tip-num">06 · TRAINING</div><div class="tip-title">Progression dokumentieren</div><div class="tip-text">Jede Woche Gewicht oder Wiederholung um 1 steigern. Wenn du 3 Wochen am gleichen Gewicht hängst, Übung wechseln oder Pausenzeit anpassen.</div></div>
+  <div class="tip-card"><div class="tip-num">07 · REGENERATION</div><div class="tip-title">Schlaf weiter verbessern</div><div class="tip-text">Du bist bei 6h09 wochentags — gut, aber Ziel ist 7h+. Letzter Schritt: 22:00 wirklich Handy weg.</div></div>
+  <div class="tip-card"><div class="tip-num">08 · REGENERATION</div><div class="tip-title">2 Tage Pause zwischen Training</div><div class="tip-text">Idealer Wochenrhythmus: Mo Push · Di Pull · Mi Pause · Do Beine · Fr Upper · Sa Cardio · So Pause. Nie 4 Tage Kraft am Stück.</div></div>
+  <div class="tip-card"><div class="tip-num">09 · STRUKTUR</div><div class="tip-title">Aufwärmsätze einbauen</div><div class="tip-text">Vor Bankdrücken & Co.: 1–2 Sätze mit halbem Gewicht. Reduziert Verletzungsrisiko und lässt dich im Arbeitssatz schwerer heben.</div></div>
+  <div class="tip-card"><div class="tip-num">10 · NACH KRANKHEIT</div><div class="tip-title">Erste 2 Wochen reduziert</div><div class="tip-text">Da du 2,5 kg Muskelmasse verloren hast: erste 2 Wochen mit ~80 % der Gewichte einsteigen. Muscle Memory bringt das schneller zurück.</div></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('tabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('tab')) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.day, .tips-section').forEach(d => d.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('day-' + e.target.dataset.day).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
+</script>
+{% endblock %}

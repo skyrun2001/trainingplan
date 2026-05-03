@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0A0A0A">
+<title>{% block title %}Trainingsplan – Lukas{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0A0A;
+  --surface: rgba(255,255,255,0.03);
+  --surface2: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #E8E4DE;
+  --dim: #888;
+  --muted: #555;
+  --push: #C9184A;
+  --pull: #2D6A4F;
+  --legs: #E09F3E;
+  --upper: #4361EE;
+  --warn: #F77F00;
+  --green: #22c55e;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ── NAV ── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 54px;
+  gap: 4px;
+}
+.nav-brand {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin-right: auto;
+  letter-spacing: 1px;
+}
+.nav-link {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-link.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+
+/* ── SHARED ── */
+.page { padding: 0 20px; max-width: 680px; margin: 0 auto; }
+.page-header { padding: 28px 0 16px; }
+.page-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.page-title { font-size: 24px; font-weight: 700; }
+.page-sub { color: var(--dim); font-size: 13px; margin-top: 4px; }
+
+.card {
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--dim);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  text-decoration: none;
+}
+.btn-primary { background: var(--text); color: #0A0A0A; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
+.btn-danger { background: rgba(201,24,74,0.15); color: var(--push); border: 1px solid rgba(201,24,74,0.25); }
+.btn-danger:hover { background: rgba(201,24,74,0.25); }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+.tag-push  { background: rgba(201,24,74,0.12);  color: var(--push);  border: 1px solid rgba(201,24,74,0.25); }
+.tag-pull  { background: rgba(45,106,79,0.15);  color: #4CAF7D;      border: 1px solid rgba(45,106,79,0.3); }
+.tag-legs  { background: rgba(224,159,62,0.12); color: var(--legs);  border: 1px solid rgba(224,159,62,0.25); }
+.tag-upper { background: rgba(67,97,238,0.12);  color: #7B9EFF;      border: 1px solid rgba(67,97,238,0.25); }
+
+.mono { font-family: 'Space Mono', monospace; }
+.dim  { color: var(--dim); }
+.muted { color: var(--muted); font-size: 12px; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a1a1a;
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(34,197,94,0.4); color: var(--green); }
+.toast.error   { border-color: rgba(201,24,74,0.4); color: var(--push); }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">LUKAS</span>
+  <a href="{{ path('app_plan') }}"      class="nav-link {% if app.request.attributes.get('_route') == 'app_plan' %}active{% endif %}">Plan</a>
+  <a href="{{ path('app_log') }}"       class="nav-link {% if app.request.attributes.get('_route') starts with 'app_log' %}active{% endif %}">Loggen</a>
+  <a href="{{ path('app_dashboard') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">Dashboard</a>
+</nav>
+
+{% block body %}{% endblock %}
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

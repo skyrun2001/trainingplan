@@ -1,0 +1,481 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Training loggen – {{ type|upper }}{% endblock %}
+
+{% block head %}
+<style>
+{% set colors = {'push':'#C9184A','pull':'#2D6A4F','legs':'#E09F3E','upper':'#4361EE'} %}
+{% set accent = colors[type] ?? '#888' %}
+:root { --accent: {{ accent }}; }
+
+.log-header {
+  padding: 20px 20px 0;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.type-selector {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.type-selector::-webkit-scrollbar { display: none; }
+.type-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: 2px solid var(--border);
+  color: var(--dim);
+  background: var(--surface);
+  transition: all 0.15s;
+}
+.type-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.exercise-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.ex-header {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.ex-header:hover { background: var(--surface2); }
+.ex-num-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 22px;
+}
+.ex-title { flex: 1; font-size: 14px; font-weight: 600; }
+.ex-summary { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.ex-chevron {
+  color: var(--muted);
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+.ex-chevron.open { transform: rotate(180deg); }
+
+.sets-container { display: none; padding: 0 16px 14px; }
+.sets-container.open { display: block; }
+
+.set-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 1fr auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.set-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+.set-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 10px;
+  text-align: center;
+  width: 100%;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+.set-input::-webkit-outer-spin-button,
+.set-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.set-input:focus { outline: none; border-color: var(--accent); }
+.set-input.filled { border-color: rgba(34,197,94,0.4); color: var(--green); }
+.set-input::placeholder { color: var(--muted); font-size: 11px; }
+
+.col-headers {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 1fr auto;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.col-header { font-size: 10px; color: var(--muted); text-align: center; letter-spacing: 1px; text-transform: uppercase; }
+
+.remove-set {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+  width: 28px;
+  text-align: center;
+}
+.remove-set:hover { color: var(--push); }
+
+.add-set-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  color: var(--dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 7px 12px;
+  margin-top: 4px;
+  transition: all 0.15s;
+  width: 100%;
+  justify-content: center;
+}
+.add-set-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.prev-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-family: 'Space Mono', monospace;
+}
+.prev-hint span { color: var(--dim); }
+
+.section-sep {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 18px 0 8px;
+}
+
+.meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.meta-field label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.meta-field input, .meta-field textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  width: 100%;
+}
+.meta-field input:focus, .meta-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.meta-field textarea { resize: vertical; min-height: 60px; }
+
+.submit-bar {
+  position: sticky;
+  bottom: 0;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  gap: 10px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.submit-bar .btn { flex: 1; justify-content: center; }
+
+.progress-bar-wrap {
+  background: var(--surface2);
+  border-radius: 4px;
+  height: 3px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="type-selector">
+  {% for t, label in {'push':'Push','pull':'Pull','legs':'Beine','upper':'Upper'} %}
+    <a href="{{ path('app_log', {type: t}) }}" class="type-btn {% if type == t %}active{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="page">
+  <div class="log-header">
+    <div class="page-label">Training loggen</div>
+    <div class="page-title" style="color: var(--accent)">
+      {% set labels = {'push':'Push — Brust, Schulter, Trizeps','pull':'Pull — Rücken, Bizeps','legs':'Beine — Komplett','upper':'Upper — Schwachpunkte'} %}
+      {{ labels[type] }}
+    </div>
+    <div class="progress-bar-wrap" style="margin-top:12px">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="exerciseList">
+    {% for ex in exercises %}
+      {% if loop.first or ex.section != exercises[loop.index0 - 1].section %}
+        <div class="section-sep">{{ ex.section }}</div>
+      {% endif %}
+
+      <div class="exercise-card" data-name="{{ ex.name }}">
+        <div class="ex-header" onclick="toggleSets(this)">
+          <span class="ex-num-badge">{{ loop.index0 }}</span>
+          <div>
+            <div class="ex-title">{{ ex.name }}</div>
+            <div class="ex-summary" id="summary-{{ loop.index0 }}">{{ ex.defaultSets }} Sätze · {{ ex.defaultReps ?? '—' }} Wdh</div>
+          </div>
+          <span class="ex-chevron" id="chevron-{{ loop.index0 }}">▼</span>
+        </div>
+        <div class="sets-container" id="sets-{{ loop.index0 }}">
+          <div class="prev-hint" id="prev-{{ loop.index0 }}">Letzte Session: <span>wird geladen…</span></div>
+          <div class="col-headers">
+            <div class="col-header"></div>
+            <div class="col-header">Wdh</div>
+            <div class="col-header">kg</div>
+            <div class="col-header">RPE</div>
+            <div></div>
+          </div>
+          <div class="set-rows" id="rows-{{ loop.index0 }}">
+            {% for i in 1..ex.defaultSets %}
+              <div class="set-row">
+                <span class="set-label">{{ i }}</span>
+                <input type="number" class="set-input reps-input" placeholder="Wdh" min="1" max="99"
+                       value="{{ ex.defaultReps ?? '' }}" data-set="{{ i }}" oninput="updateSummary({{ loop.parent.loop.index0 }})">
+                <input type="number" class="set-input weight-input" placeholder="kg" min="0" max="999" step="0.5"
+                       data-set="{{ i }}" oninput="onWeightInput(this); updateSummary({{ loop.parent.loop.index0 }})">
+                <input type="number" class="set-input rpe-input" placeholder="—" min="1" max="10"
+                       data-set="{{ i }}">
+                <button class="remove-set" onclick="removeSet(this)" title="Satz löschen">×</button>
+              </div>
+            {% endfor %}
+          </div>
+          <button class="add-set-btn" onclick="addSet({{ loop.index0 }})">+ Satz hinzufügen</button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <hr class="divider" style="margin-top:20px">
+  <div class="section-sep">Details</div>
+  <div class="meta-row">
+    <div class="meta-field">
+      <label>Datum</label>
+      <input type="date" id="metaDate" value="{{ "now"|date("Y-m-d") }}">
+    </div>
+    <div class="meta-field">
+      <label>Dauer (Min)</label>
+      <input type="number" id="metaDuration" placeholder="z.B. 60" min="10" max="180">
+    </div>
+  </div>
+  <div class="meta-field">
+    <label>Notizen (optional)</label>
+    <textarea id="metaNotes" placeholder="Wie war das Training? Besonderheiten?"></textarea>
+  </div>
+  <div style="height:80px"></div>
+</div>
+
+<div class="submit-bar">
+  <a href="{{ path('app_plan') }}" class="btn btn-ghost">← Zurück</a>
+  <button class="btn btn-primary" id="saveBtn" onclick="saveWorkout()">Training speichern</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TYPE = '{{ type }}';
+const EXERCISES = {{ exercises|json_encode|raw }};
+let prevWeights = {};
+
+// Load previous weights from last session
+fetch('/api/last-weights/{{ type }}')
+  .then(r => r.json())
+  .then(data => {
+    prevWeights = data;
+    document.querySelectorAll('.exercise-card').forEach((card, idx) => {
+      const name = card.dataset.name;
+      const hint = document.getElementById('prev-' + (idx + 1));
+      if (hint && data[name]) {
+        hint.innerHTML = `Letzte Session: <span>${data[name].weight} kg × ${data[name].reps} Wdh (${data[name].date})</span>`;
+        // Pre-fill weight inputs with previous value
+        card.querySelectorAll('.weight-input').forEach(inp => {
+          inp.value = data[name].weight;
+          inp.classList.add('filled');
+        });
+      } else if (hint) {
+        hint.innerHTML = 'Letzte Session: <span>Noch keine Daten</span>';
+      }
+    });
+  })
+  .catch(() => {});
+
+function toggleSets(header) {
+  const card = header.closest('.exercise-card');
+  const idx = [...document.querySelectorAll('.exercise-card')].indexOf(card) + 1;
+  const container = document.getElementById('sets-' + idx);
+  const chevron   = document.getElementById('chevron-' + idx);
+  const isOpen    = container.classList.toggle('open');
+  chevron.classList.toggle('open', isOpen);
+}
+
+function addSet(idx) {
+  const rows = document.getElementById('rows-' + idx);
+  const setNum = rows.querySelectorAll('.set-row').length + 1;
+  const prevWeight = rows.querySelector('.weight-input:last-of-type')?.value || '';
+  const prevReps   = rows.querySelector('.reps-input:last-of-type')?.value || '';
+  const row = document.createElement('div');
+  row.className = 'set-row';
+  row.innerHTML = `
+    <span class="set-label">${setNum}</span>
+    <input type="number" class="set-input reps-input" placeholder="Wdh" min="1" max="99"
+           value="${prevReps}" data-set="${setNum}" oninput="updateSummary(${idx})">
+    <input type="number" class="set-input weight-input" placeholder="kg" min="0" max="999" step="0.5"
+           value="${prevWeight}" data-set="${setNum}" oninput="onWeightInput(this); updateSummary(${idx})">
+    <input type="number" class="set-input rpe-input" placeholder="—" min="1" max="10" data-set="${setNum}">
+    <button class="remove-set" onclick="removeSet(this)" title="Satz löschen">×</button>`;
+  rows.appendChild(row);
+  if (prevWeight) row.querySelector('.weight-input').classList.add('filled');
+  updateSummary(idx);
+}
+
+function removeSet(btn) {
+  const row = btn.closest('.set-row');
+  const rows = row.closest('.set-rows');
+  if (rows.querySelectorAll('.set-row').length <= 1) return;
+  row.remove();
+  // Re-number
+  rows.querySelectorAll('.set-row').forEach((r, i) => {
+    r.querySelector('.set-label').textContent = i + 1;
+  });
+  const card = rows.closest('.exercise-card');
+  const idx = [...document.querySelectorAll('.exercise-card')].indexOf(card) + 1;
+  updateSummary(idx);
+}
+
+function onWeightInput(inp) {
+  inp.classList.toggle('filled', inp.value !== '');
+}
+
+function updateSummary(idx) {
+  const rows = document.getElementById('rows-' + idx);
+  const setCount = rows.querySelectorAll('.set-row').length;
+  const weights = [...rows.querySelectorAll('.weight-input')].map(i => parseFloat(i.value)).filter(v => !isNaN(v));
+  const reps    = [...rows.querySelectorAll('.reps-input')].map(i => parseInt(i.value)).filter(v => !isNaN(v));
+  let summary = `${setCount} Sätze`;
+  if (reps.length > 0)    summary += ` · ${Math.min(...reps)}–${Math.max(...reps)} Wdh`;
+  if (weights.length > 0) summary += ` · ${Math.max(...weights)} kg`;
+  document.getElementById('summary-' + idx).textContent = summary;
+  updateProgress();
+}
+
+function updateProgress() {
+  const total   = document.querySelectorAll('.exercise-card').length;
+  const filled  = [...document.querySelectorAll('.exercise-card')].filter(card => {
+    return [...card.querySelectorAll('.weight-input')].some(i => i.value !== '');
+  }).length;
+  const pct = total ? Math.round((filled / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function saveWorkout() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Speichern…';
+
+  const exercises = {};
+  document.querySelectorAll('.exercise-card').forEach((card, cardIdx) => {
+    const name = card.dataset.name;
+    const sets = [];
+    card.querySelectorAll('.set-row').forEach((row, setIdx) => {
+      const reps   = row.querySelector('.reps-input')?.value;
+      const weight = row.querySelector('.weight-input')?.value;
+      const rpe    = row.querySelector('.rpe-input')?.value;
+      if (reps || weight) {
+        sets.push({
+          set:    setIdx + 1,
+          reps:   reps   ? parseInt(reps)   : null,
+          weight: weight ? parseFloat(weight) : null,
+          rpe:    rpe    ? parseInt(rpe)    : null,
+        });
+      }
+    });
+    if (sets.length > 0) exercises[name] = sets;
+  });
+
+  if (Object.keys(exercises).length === 0) {
+    showToast('Bitte mindestens eine Übung eintragen.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Training speichern';
+    return;
+  }
+
+  const payload = {
+    type:      TYPE,
+    date:      document.getElementById('metaDate').value,
+    duration:  parseInt(document.getElementById('metaDuration').value) || null,
+    notes:     document.getElementById('metaNotes').value || null,
+    exercises,
+  };
+
+  fetch('/log/save', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      showToast('Training gespeichert! ✓', 'success');
+      setTimeout(() => window.location.href = '/dashboard', 1200);
+    } else {
+      throw new Error(data.error || 'Fehler');
+    }
+  })
+  .catch(err => {
+    showToast('Fehler beim Speichern: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Training speichern';
+  });
+}
+
+// Open first exercise by default
+document.querySelector('.ex-header')?.click();
+</script>
+{% endblock %}
