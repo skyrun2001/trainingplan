@@ -430,9 +430,10 @@ async function saveReminderTime(val) {
   scheduleReminderCheck();
 }
 
+{% set _today = weekDays|filter(d => d.isToday)|first|default(null) %}
 // Schedule for today's gym type from the page data
-const todayScheduledType = '{{ weekDays|filter(d => d.isToday)|first is defined ? (weekDays|filter(d => d.isToday)|first).scheduledType ?? '' : '' }}';
-const todayHasSessions   = {{ weekDays|filter(d => d.isToday)|first is defined and (weekDays|filter(d => d.isToday)|first).hasSessions ? 'true' : 'false' }};
+const todayScheduledType = "{{ _today ? _today.scheduledType|default('') : '' }}";
+const todayHasSessions   = {{ (_today and _today.hasSessions) ? 'true' : 'false' }};
 const typeLabels         = {push:'Push — Brust, Schulter, Trizeps', pull:'Pull — Rücken, Bizeps', legs:'Beine — Komplett', upper:'Upper — Schwachpunkte'};
 
 let reminderInterval = null;
