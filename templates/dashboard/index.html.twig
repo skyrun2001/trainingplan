@@ -224,7 +224,7 @@ option { background: #1a1a1a; }
         <div class="week-bar-wrap">
           <div class="week-count">{{ week.count }}</div>
           <div class="week-bar {% if week.count > 0 %}has-data{% endif %}"
-               style="height:{{ max(heightPct, 10) }}%; {% if week.count > 0 %}--accent: #{{ ['C9184A','4CAF7D','E09F3E','4361EE']|random }};{% endif %}"></div>
+               style="height:{{ max(heightPct, 10) }}%; {% if week.count > 0 %}--accent: #{{ random(['C9184A','4CAF7D','E09F3E','4361EE']) }};{% endif %}"></div>
           <div class="week-label">{{ week.label }}</div>
         </div>
       {% endfor %}
