@@ -206,6 +206,45 @@
       {{ day.type|capitalize }}
     </button>
   {% endfor %}
+  <button class="tab" id="addDayTab" onclick="toggleAddDayForm()" style="--accent:#888;border-style:dashed">+ Tag</button>
+</div>
+
+{# Add day form — hidden by default #}
+<div id="addDayForm" style="display:none;max-width:680px;margin:0 auto 16px;padding:0 20px">
+  <div class="add-exercise-area">
+    <div class="add-exercise-title"><span>+</span> Neuen Trainingstag hinzufügen</div>
+    <div class="form-grid">
+      <div>
+        <label class="f-label">Bezeichnung *</label>
+        <input class="f-input" id="new-day-label" placeholder="z.B. Push — Brust, Schulter, Trizeps">
+      </div>
+      <div>
+        <label class="f-label">Kürzel (für Tab) *</label>
+        <input class="f-input" id="new-day-type" placeholder="z.B. push2" maxlength="20">
+      </div>
+      <div>
+        <label class="f-label">Farbe</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:4px" id="colorPicker">
+          {% for color in ['#C9184A','#2D6A4F','#E09F3E','#4361EE','#7B2D8B','#0891B2','#16A34A','#EA580C'] %}
+            <button type="button"
+                    onclick="selectColor('{{ color }}')"
+                    data-color="{{ color }}"
+                    style="width:28px;height:28px;border-radius:7px;background:{{ color }};border:2px solid transparent;cursor:pointer;transition:border-color 0.15s"
+                    title="{{ color }}"></button>
+          {% endfor %}
+        </div>
+        <input type="hidden" id="new-day-color" value="#C9184A">
+      </div>
+      <div>
+        <label class="f-label">Fokus / Untertitel</label>
+        <input class="f-input" id="new-day-focus" placeholder="z.B. Schwerer Tag · ~60 Min">
+      </div>
+    </div>
+    <div class="form-actions" style="justify-content:flex-start;margin-top:4px">
+      <button class="btn btn-ghost btn-sm" onclick="toggleAddDayForm()">Abbrechen</button>
+      <button class="btn btn-primary btn-sm" onclick="addDay()">Tag hinzufügen</button>
+    </div>
+  </div>
 </div>
 
 {% for day in plan.days %}
@@ -215,9 +254,12 @@
 
     {# Day header — click to edit day props #}
     <div class="edit-day-header">
-      <div class="edit-day-title" onclick="toggleDayForm({{ day.id }})">
-        <span>{{ day.label }}</span>
-        <span style="font-size:12px;font-weight:400;color:var(--dim)">✎ bearbeiten</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="edit-day-title" onclick="toggleDayForm({{ day.id }})">
+          <span>{{ day.label }}</span>
+          <span style="font-size:12px;font-weight:400;color:var(--dim)">✎ bearbeiten</span>
+        </div>
+        <button class="icon-btn danger" title="Tag löschen" onclick="deleteDay({{ day.id }}, '{{ day.label|e('js') }}')">✕</button>
       </div>
       {% if day.focus %}<div style="font-size:12px;color:var(--dim);margin-top:4px">{{ day.focus }}</div>{% endif %}
 
@@ -481,6 +523,56 @@ async function moveEx(id, direction) {
 }
 
 // ── Add new exercise ─────────────────────────────────────────────────────────
+// ── Add / delete day ─────────────────────────────────────────────────────────
+function toggleAddDayForm() {
+  const form = document.getElementById('addDayForm');
+  const tab  = document.getElementById('addDayTab');
+  const open = form.style.display === 'none';
+  form.style.display = open ? 'block' : 'none';
+  tab.classList.toggle('active', open);
+  if (open) document.getElementById('new-day-label').focus();
+}
+
+function selectColor(color) {
+  document.getElementById('new-day-color').value = color;
+  document.querySelectorAll('#colorPicker button').forEach(b => {
+    b.style.borderColor = b.dataset.color === color ? '#fff' : 'transparent';
+  });
+}
+// Highlight default color on load
+selectColor('#C9184A');
+
+async function addDay() {
+  const label = document.getElementById('new-day-label').value.trim();
+  const type  = document.getElementById('new-day-type').value.trim();
+  if (!label) { showToast('Bezeichnung ist erforderlich', 'error'); return; }
+  if (!type)  { showToast('Kürzel ist erforderlich', 'error'); return; }
+
+  const r = await fetch('/api/plan/days', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      label,
+      type,
+      color: document.getElementById('new-day-color').value,
+      focus: document.getElementById('new-day-focus').value.trim() || null,
+    }),
+  });
+  const data = await r.json();
+  if (!r.ok) { showToast(data.error || 'Fehler', 'error'); return; }
+  showToast('Tag hinzugefügt ✓');
+  location.href = '/plans/edit#' + data.type;
+}
+
+async function deleteDay(id, label) {
+  if (!confirm(`Tag „${label}" und alle seine Übungen löschen?`)) return;
+  const r = await fetch('/api/plan/days/' + id, { method: 'DELETE' });
+  const data = await r.json();
+  if (!r.ok) { showToast(data.error || 'Fehler', 'error'); return; }
+  showToast('Tag gelöscht');
+  location.reload();
+}
+
 async function addExercise(dayId) {
   const name = document.getElementById('new-name-' + dayId).value.trim();
   if (!name) { showToast('Name ist erforderlich', 'error'); return; }

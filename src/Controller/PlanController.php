@@ -37,6 +37,55 @@ class PlanController extends AbstractController
 
     // ── API: Day ────────────────────────────────────────────────────────────
 
+    #[Route('/api/plan/days', name: 'api_plan_day_add', methods: ['POST'])]
+    public function addDay(Request $request): JsonResponse
+    {
+        $plan = $this->seeder->seedIfNeeded($this->getUser());
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        if (empty($data['label'])) {
+            return $this->json(['error' => 'Bezeichnung erforderlich'], 422);
+        }
+
+        $type = preg_replace('/[^a-z0-9_]/', '', strtolower($data['type'] ?? 'custom'));
+        if ($type === '') $type = 'custom';
+
+        $maxSort = 0;
+        foreach ($plan->getDays() as $d) {
+            $maxSort = max($maxSort, $d->getSortOrder());
+        }
+
+        $day = new PlanDay();
+        $day->setType($type);
+        $day->setLabel($data['label']);
+        $day->setColor($data['color'] ?? '#888888');
+        $day->setFocus($data['focus'] ?? null);
+        $day->setSortOrder($maxSort + 1);
+        $plan->addDay($day);
+
+        $this->em->persist($day);
+        $this->em->flush();
+
+        return $this->json(['id' => $day->getId(), 'type' => $day->getType()], 201);
+    }
+
+    #[Route('/api/plan/days/{id}', name: 'api_plan_day_delete', methods: ['DELETE'])]
+    public function deleteDay(int $id, PlanDayRepository $repo): JsonResponse
+    {
+        $day = $repo->find($id);
+        if (!$day || $day->getPlan()->getUser() !== $this->getUser()) {
+            return $this->json(['error' => 'Not found'], 404);
+        }
+        if ($day->getPlan()->getDays()->count() <= 1) {
+            return $this->json(['error' => 'Mindestens ein Tag muss verbleiben'], 422);
+        }
+
+        $this->em->remove($day);
+        $this->em->flush();
+
+        return $this->json(['success' => true]);
+    }
+
     #[Route('/api/plan/days/{id}', name: 'api_plan_day_update', methods: ['PATCH'])]
     public function updateDay(int $id, Request $request, PlanDayRepository $repo): JsonResponse
     {
