@@ -31,6 +31,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\Column(type: Types::JSON)]
+    private array $settings = [];
+
     #[ORM\OneToMany(targetEntity: TrainingPlan::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $trainingPlans;
 
@@ -65,6 +68,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void {}
 
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+
+    private function defaultSettings(): array
+    {
+        return [
+            'weekSchedule' => ['1' => null, '2' => null, '3' => null, '4' => null, '5' => null, '6' => null, '7' => null],
+            'reminderTime' => null,
+        ];
+    }
+
+    public function getSettings(): array
+    {
+        return array_merge($this->defaultSettings(), $this->settings);
+    }
+
+    public function setSettings(array $s): static { $this->settings = $s; return $this; }
+
+    public function getWeekSchedule(): array
+    {
+        return array_merge(
+            $this->defaultSettings()['weekSchedule'],
+            $this->getSettings()['weekSchedule'] ?? []
+        );
+    }
+
+    public function getReminderTime(): ?string
+    {
+        return $this->getSettings()['reminderTime'] ?? null;
+    }
 
     public function getTrainingPlans(): Collection { return $this->trainingPlans; }
 

@@ -70,7 +70,8 @@
             "@composer install --no-interaction",
             "@php -r \"is_dir('var') || mkdir('var', 0755, true);\"",
             "@php bin/console doctrine:migrations:migrate --no-interaction",
-            "@php bin/console cache:warmup"
+            "@php bin/console cache:warmup",
+            "@php -r \"echo \"\\n  Fertig! Benutzer anlegen mit:\\n  php bin/console app:create-user USERNAME PASSWORD\\n\\n\";\""
         ]
     },
     "conflict": {

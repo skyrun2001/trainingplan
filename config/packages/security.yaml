@@ -31,9 +31,8 @@ security:
                 lifetime: 604800
 
     access_control:
-        - { path: ^/login,    roles: PUBLIC_ACCESS }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/,         roles: ROLE_USER }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/,      roles: ROLE_USER }
 
 when@test:
     security:
