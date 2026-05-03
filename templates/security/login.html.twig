@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+{% block title %}Login{% endblock %}
+
+{% block head %}
+<style>
+.auth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 54px);
+  padding: 24px 20px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px 28px;
+}
+.auth-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.auth-sub { font-size: 13px; color: var(--dim); margin-bottom: 28px; }
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  padding: 12px 14px;
+  transition: border-color 0.15s;
+}
+.field input:focus { outline: none; border-color: var(--text); }
+.auth-error {
+  background: rgba(201,24,74,0.1);
+  border: 1px solid rgba(201,24,74,0.3);
+  border-radius: 9px;
+  color: var(--push);
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.auth-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  background: var(--text);
+  color: #0A0A0A;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: opacity 0.15s;
+}
+.auth-btn:hover { opacity: 0.9; }
+.auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
+.auth-footer a { color: var(--text); text-decoration: none; }
+.remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--dim); }
+.remember-row input { width: auto; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-title">Willkommen zurück</div>
+    <div class="auth-sub">Melde dich an um fortzufahren</div>
+
+    {% if error %}
+      <div class="auth-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.request.query.get('registered') %}
+      <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:9px;color:var(--green);font-size:13px;padding:10px 14px;margin-bottom:16px">
+        Account erstellt — jetzt einloggen!
+      </div>
+    {% endif %}
+
+    <form method="post">
+      <div class="field">
+        <label for="username">Benutzername</label>
+        <input type="text" id="username" name="username"
+               value="{{ last_username }}" autocomplete="username" autofocus required>
+      </div>
+      <div class="field">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <div class="remember-row">
+        <input type="checkbox" id="remember" name="_remember_me">
+        <label for="remember">Angemeldet bleiben (7 Tage)</label>
+      </div>
+      <button class="auth-btn" type="submit">Einloggen</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,600 @@
+{% extends 'base.html.twig' %}
+{% block title %}Plan bearbeiten{% endblock %}
+
+{% block head %}
+<style>
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.day-edit { display: none; padding: 0 20px; max-width: 680px; margin: 0 auto; }
+.day-edit.active { display: block; }
+
+.edit-day-header {
+  margin: 8px 0 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.edit-day-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.edit-day-title:hover { opacity: 0.85; }
+.edit-day-form {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.edit-day-form.open { display: block; }
+
+.ex-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ex-edit-row:last-of-type { border-bottom: none; }
+.ex-edit-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  min-width: 20px;
+}
+.ex-edit-info { flex: 1; min-width: 0; }
+.ex-edit-name { font-size: 14px; font-weight: 600; }
+.ex-edit-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'Space Mono', monospace; }
+.ex-edit-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--dim);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+.icon-btn.danger:hover { color: var(--push); border-color: rgba(201,24,74,0.4); background: rgba(201,24,74,0.08); }
+
+.ex-inline-form {
+  display: none;
+  padding: 14px;
+  margin: 4px 0 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border2);
+}
+.ex-inline-form.open { display: block; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-full   { grid-column: 1 / -1; }
+
+.f-label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.f-input, .f-select {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  transition: border-color 0.15s;
+}
+.f-input:focus, .f-select:focus { outline: none; border-color: var(--accent); }
+.f-select option { background: #1a1a1a; }
+
+.checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dim); }
+.checkbox-row input { width: auto; accent-color: var(--accent); }
+
+.form-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+
+.section-sep {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 8px;
+}
+
+.add-exercise-area {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px dashed var(--border2);
+  background: rgba(255,255,255,0.02);
+}
+.add-exercise-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.add-exercise-title span { font-size: 16px; }
+
+.prog-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 11px;
+  border-radius: 5px;
+  margin-top: 3px;
+  background: rgba(247,127,0,0.1);
+  color: var(--warn);
+  border: 1px solid rgba(247,127,0,0.2);
+}
+.prog-badge.is-new {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div style="max-width:680px;margin:0 auto;padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between">
+  <div>
+    <div class="page-label">Plan bearbeiten</div>
+    <div style="font-size:20px;font-weight:700">{{ plan.name }}</div>
+  </div>
+  <a href="{{ path('app_plan') }}" class="btn btn-ghost btn-sm">← Ansicht</a>
+</div>
+
+<div class="tabs" id="tabs">
+  {% for day in plan.days %}
+    <button class="tab {% if loop.first %}active{% endif %}"
+            data-day="{{ day.type }}"
+            data-day-id="{{ day.id }}"
+            style="--accent:{{ day.color }}">
+      {{ day.type|capitalize }}
+    </button>
+  {% endfor %}
+  <button class="tab" id="addDayTab" onclick="toggleAddDayForm()" style="--accent:#888;border-style:dashed">+ Tag</button>
+</div>
+
+{# Add day form — hidden by default #}
+<div id="addDayForm" style="display:none;max-width:680px;margin:0 auto 16px;padding:0 20px">
+  <div class="add-exercise-area">
+    <div class="add-exercise-title"><span>+</span> Neuen Trainingstag hinzufügen</div>
+    <div class="form-grid">
+      <div>
+        <label class="f-label">Bezeichnung *</label>
+        <input class="f-input" id="new-day-label" placeholder="z.B. Push — Brust, Schulter, Trizeps">
+      </div>
+      <div>
+        <label class="f-label">Kürzel (für Tab) *</label>
+        <input class="f-input" id="new-day-type" placeholder="z.B. push2" maxlength="20">
+      </div>
+      <div>
+        <label class="f-label">Farbe</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:4px" id="colorPicker">
+          {% for color in ['#C9184A','#2D6A4F','#E09F3E','#4361EE','#7B2D8B','#0891B2','#16A34A','#EA580C'] %}
+            <button type="button"
+                    onclick="selectColor('{{ color }}')"
+                    data-color="{{ color }}"
+                    style="width:28px;height:28px;border-radius:7px;background:{{ color }};border:2px solid transparent;cursor:pointer;transition:border-color 0.15s"
+                    title="{{ color }}"></button>
+          {% endfor %}
+        </div>
+        <input type="hidden" id="new-day-color" value="#C9184A">
+      </div>
+      <div>
+        <label class="f-label">Fokus / Untertitel</label>
+        <input class="f-input" id="new-day-focus" placeholder="z.B. Schwerer Tag · ~60 Min">
+      </div>
+    </div>
+    <div class="form-actions" style="justify-content:flex-start;margin-top:4px">
+      <button class="btn btn-ghost btn-sm" onclick="toggleAddDayForm()">Abbrechen</button>
+      <button class="btn btn-primary btn-sm" onclick="addDay()">Tag hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+{% for day in plan.days %}
+  <div class="day-edit {% if loop.first %}active{% endif %}"
+       id="day-{{ day.type }}"
+       style="--accent:{{ day.color }}">
+
+    {# Day header — click to edit day props #}
+    <div class="edit-day-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="edit-day-title" onclick="toggleDayForm({{ day.id }})">
+          <span>{{ day.label }}</span>
+          <span style="font-size:12px;font-weight:400;color:var(--dim)">✎ bearbeiten</span>
+        </div>
+        <button class="icon-btn danger" title="Tag löschen" onclick="deleteDay({{ day.id }}, '{{ day.label|e('js') }}')">✕</button>
+      </div>
+      {% if day.focus %}<div style="font-size:12px;color:var(--dim);margin-top:4px">{{ day.focus }}</div>{% endif %}
+
+      <div class="edit-day-form" id="day-form-{{ day.id }}">
+        <div class="form-grid">
+          <div>
+            <label class="f-label">Bezeichnung</label>
+            <input class="f-input" id="day-label-{{ day.id }}" value="{{ day.label }}">
+          </div>
+          <div>
+            <label class="f-label">Fokus / Untertitel</label>
+            <input class="f-input" id="day-focus-{{ day.id }}" value="{{ day.focus ?? '' }}">
+          </div>
+          <div class="form-full">
+            <label class="f-label">Notiz</label>
+            <input class="f-input" id="day-note-{{ day.id }}" value="{{ day.note ?? '' }}" placeholder="z.B. 💡 Hinweis...">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleDayForm({{ day.id }})">Abbrechen</button>
+          <button class="btn btn-primary btn-sm" onclick="saveDayForm({{ day.id }})">Speichern</button>
+        </div>
+      </div>
+    </div>
+
+    {# Exercise list #}
+    <div id="ex-list-{{ day.id }}">
+      {% set currentSection = '' %}
+      {% for ex in day.exercises %}
+        {% if ex.section != currentSection %}
+          <div class="section-sep">{{ ex.section }}</div>
+          {% set currentSection = ex.section %}
+        {% endif %}
+
+        <div id="ex-item-{{ ex.id }}">
+          <div class="ex-edit-row">
+            <span class="ex-edit-num">{{ loop.index0 }}</span>
+            <div class="ex-edit-info">
+              <div class="ex-edit-name">{{ ex.name }}</div>
+              <div class="ex-edit-meta">
+                {{ ex.defaultSets }}× {% if ex.defaultReps %}{{ ex.defaultReps }} Wdh{% else %}—{% endif %}
+                · {{ ex.section }}
+              </div>
+              {% if ex.progressionNote %}
+                <span class="prog-badge {% if ex.isNew %}is-new{% endif %}">{{ ex.progressionNote }}</span>
+              {% endif %}
+            </div>
+            <div class="ex-edit-actions">
+              <button class="icon-btn" title="Nach oben" onclick="moveEx({{ ex.id }}, 'up')">↑</button>
+              <button class="icon-btn" title="Nach unten" onclick="moveEx({{ ex.id }}, 'down')">↓</button>
+              <button class="icon-btn" title="Bearbeiten" onclick="toggleExForm({{ ex.id }})">✎</button>
+              <button class="icon-btn danger" title="Löschen" onclick="deleteEx({{ ex.id }})">✕</button>
+            </div>
+          </div>
+
+          <div class="ex-inline-form" id="ex-form-{{ ex.id }}">
+            <div class="form-grid form-grid-3">
+              <div class="form-full">
+                <label class="f-label">Übungsname</label>
+                <input class="f-input" id="ex-name-{{ ex.id }}" value="{{ ex.name }}">
+              </div>
+              <div>
+                <label class="f-label">Abschnitt</label>
+                <input class="f-input" id="ex-section-{{ ex.id }}" value="{{ ex.section }}"
+                       list="sections-{{ day.id }}">
+              </div>
+              <div>
+                <label class="f-label">Std. Sätze</label>
+                <input class="f-input" type="number" id="ex-sets-{{ ex.id }}" value="{{ ex.defaultSets }}" min="1" max="10">
+              </div>
+              <div>
+                <label class="f-label">Std. Wdh</label>
+                <input class="f-input" type="number" id="ex-reps-{{ ex.id }}" value="{{ ex.defaultReps ?? '' }}" placeholder="—" min="1" max="99">
+              </div>
+              <div class="form-full">
+                <label class="f-label">Progression / Badge-Text</label>
+                <input class="f-input" id="ex-prog-{{ ex.id }}" value="{{ ex.progressionNote ?? '' }}" placeholder="z.B. ↑ steigern auf 70 kg">
+              </div>
+              <div>
+                <label class="f-label">&nbsp;</label>
+                <div class="checkbox-row">
+                  <input type="checkbox" id="ex-new-{{ ex.id }}" {% if ex.isNew %}checked{% endif %}>
+                  <label for="ex-new-{{ ex.id }}">Als NEU markieren</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-ghost btn-sm" onclick="toggleExForm({{ ex.id }})">Abbrechen</button>
+              <button class="btn btn-primary btn-sm" onclick="saveEx({{ ex.id }})">Speichern</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {# Autocomplete sections datalist #}
+    <datalist id="sections-{{ day.id }}">
+      {% set seenSections = [] %}
+      {% for ex in day.exercises %}
+        {% if ex.section not in seenSections %}
+          <option value="{{ ex.section }}">
+          {% set seenSections = seenSections|merge([ex.section]) %}
+        {% endif %}
+      {% endfor %}
+    </datalist>
+
+    {# Add new exercise #}
+    <div class="add-exercise-area">
+      <div class="add-exercise-title"><span>+</span> Neue Übung hinzufügen</div>
+      <div class="form-grid form-grid-3">
+        <div class="form-full">
+          <label class="f-label">Übungsname *</label>
+          <input class="f-input" id="new-name-{{ day.id }}" placeholder="z.B. Bankdrücken">
+        </div>
+        <div>
+          <label class="f-label">Abschnitt</label>
+          <input class="f-input" id="new-section-{{ day.id }}" value="Hauptteil"
+                 list="sections-{{ day.id }}">
+        </div>
+        <div>
+          <label class="f-label">Sätze</label>
+          <input class="f-input" type="number" id="new-sets-{{ day.id }}" value="3" min="1" max="10">
+        </div>
+        <div>
+          <label class="f-label">Wdh</label>
+          <input class="f-input" type="number" id="new-reps-{{ day.id }}" placeholder="—" min="1" max="99">
+        </div>
+        <div class="form-full">
+          <label class="f-label">Progression (optional)</label>
+          <input class="f-input" id="new-prog-{{ day.id }}" placeholder="z.B. ↑ steigern auf 70 kg">
+        </div>
+      </div>
+      <div class="form-actions" style="justify-content:flex-start">
+        <button class="btn btn-primary btn-sm" onclick="addExercise({{ day.id }})">Übung hinzufügen</button>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Tab switching ────────────────────────────────────────────────────────────
+document.getElementById('tabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('tab')) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.day-edit').forEach(d => d.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('day-' + e.target.dataset.day).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
+
+// Open tab from hash
+const hash = location.hash.slice(1);
+if (hash) {
+  const btn = document.querySelector(`.tab[data-day="${hash}"]`);
+  if (btn) btn.click();
+}
+
+// ── Day form ─────────────────────────────────────────────────────────────────
+function toggleDayForm(id) {
+  document.getElementById('day-form-' + id).classList.toggle('open');
+}
+
+async function saveDayForm(id) {
+  const payload = {
+    label: document.getElementById('day-label-' + id).value,
+    focus: document.getElementById('day-focus-' + id).value,
+    note:  document.getElementById('day-note-' + id).value,
+  };
+  const r = await fetch('/api/plan/days/' + id, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  });
+  if (r.ok) {
+    showToast('Tag gespeichert ✓');
+    toggleDayForm(id);
+  } else {
+    showToast('Fehler beim Speichern', 'error');
+  }
+}
+
+// ── Exercise inline form ─────────────────────────────────────────────────────
+function toggleExForm(id) {
+  document.querySelectorAll('.ex-inline-form').forEach(f => {
+    if (f.id !== 'ex-form-' + id) f.classList.remove('open');
+  });
+  document.getElementById('ex-form-' + id).classList.toggle('open');
+}
+
+async function saveEx(id) {
+  const payload = {
+    name:            document.getElementById('ex-name-' + id).value.trim(),
+    section:         document.getElementById('ex-section-' + id).value.trim(),
+    defaultSets:     parseInt(document.getElementById('ex-sets-' + id).value),
+    defaultReps:     document.getElementById('ex-reps-' + id).value || null,
+    progressionNote: document.getElementById('ex-prog-' + id).value || null,
+    isNew:           document.getElementById('ex-new-' + id).checked,
+  };
+  if (!payload.name) { showToast('Name darf nicht leer sein', 'error'); return; }
+
+  const r = await fetch('/api/plan/exercises/' + id, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  });
+  if (!r.ok) { showToast('Fehler beim Speichern', 'error'); return; }
+
+  const data = await r.json();
+  // Update visible row
+  const item = document.getElementById('ex-item-' + id);
+  item.querySelector('.ex-edit-name').textContent = data.name;
+  item.querySelector('.ex-edit-meta').textContent =
+    data.defaultSets + '× ' + (data.defaultReps ? data.defaultReps + ' Wdh' : '—') + ' · ' + data.section;
+
+  const badge = item.querySelector('.prog-badge');
+  if (data.progressionNote) {
+    if (badge) {
+      badge.textContent = data.progressionNote;
+      badge.className   = 'prog-badge' + (data.isNew ? ' is-new' : '');
+    } else {
+      const b = document.createElement('span');
+      b.className   = 'prog-badge' + (data.isNew ? ' is-new' : '');
+      b.textContent = data.progressionNote;
+      item.querySelector('.ex-edit-info').appendChild(b);
+    }
+  } else if (badge) {
+    badge.remove();
+  }
+
+  toggleExForm(id);
+  showToast('Übung gespeichert ✓');
+}
+
+async function deleteEx(id) {
+  if (!confirm('Übung wirklich löschen?')) return;
+  const r = await fetch('/api/plan/exercises/' + id, { method: 'DELETE' });
+  if (r.ok) {
+    const el = document.getElementById('ex-item-' + id);
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.3s';
+    setTimeout(() => { el.remove(); showToast('Übung gelöscht'); }, 300);
+  } else {
+    showToast('Fehler beim Löschen', 'error');
+  }
+}
+
+async function moveEx(id, direction) {
+  const r = await fetch('/api/plan/exercises/' + id + '/move', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ direction }),
+  });
+  if (r.ok) {
+    // Reload the page to show new order
+    location.reload();
+  } else {
+    showToast('Fehler beim Verschieben', 'error');
+  }
+}
+
+// ── Add new exercise ─────────────────────────────────────────────────────────
+// ── Add / delete day ─────────────────────────────────────────────────────────
+function toggleAddDayForm() {
+  const form = document.getElementById('addDayForm');
+  const tab  = document.getElementById('addDayTab');
+  const open = form.style.display === 'none';
+  form.style.display = open ? 'block' : 'none';
+  tab.classList.toggle('active', open);
+  if (open) document.getElementById('new-day-label').focus();
+}
+
+function selectColor(color) {
+  document.getElementById('new-day-color').value = color;
+  document.querySelectorAll('#colorPicker button').forEach(b => {
+    b.style.borderColor = b.dataset.color === color ? '#fff' : 'transparent';
+  });
+}
+// Highlight default color on load
+selectColor('#C9184A');
+
+async function addDay() {
+  const label = document.getElementById('new-day-label').value.trim();
+  const type  = document.getElementById('new-day-type').value.trim();
+  if (!label) { showToast('Bezeichnung ist erforderlich', 'error'); return; }
+  if (!type)  { showToast('Kürzel ist erforderlich', 'error'); return; }
+
+  const r = await fetch('/api/plan/days', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      label,
+      type,
+      color: document.getElementById('new-day-color').value,
+      focus: document.getElementById('new-day-focus').value.trim() || null,
+    }),
+  });
+  const data = await r.json();
+  if (!r.ok) { showToast(data.error || 'Fehler', 'error'); return; }
+  showToast('Tag hinzugefügt ✓');
+  location.href = '/plans/edit#' + data.type;
+}
+
+async function deleteDay(id, label) {
+  if (!confirm(`Tag „${label}" und alle seine Übungen löschen?`)) return;
+  const r = await fetch('/api/plan/days/' + id, { method: 'DELETE' });
+  const data = await r.json();
+  if (!r.ok) { showToast(data.error || 'Fehler', 'error'); return; }
+  showToast('Tag gelöscht');
+  location.reload();
+}
+
+async function addExercise(dayId) {
+  const name = document.getElementById('new-name-' + dayId).value.trim();
+  if (!name) { showToast('Name ist erforderlich', 'error'); return; }
+
+  const payload = {
+    name,
+    section:         document.getElementById('new-section-' + dayId).value.trim() || 'Hauptteil',
+    defaultSets:     parseInt(document.getElementById('new-sets-' + dayId).value) || 3,
+    defaultReps:     document.getElementById('new-reps-' + dayId).value || null,
+    progressionNote: document.getElementById('new-prog-' + dayId).value || null,
+    isNew:           false,
+  };
+
+  const r = await fetch('/api/plan/days/' + dayId + '/exercises', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  });
+  if (!r.ok) { showToast('Fehler beim Hinzufügen', 'error'); return; }
+
+  // Reload to show new exercise in list
+  location.reload();
+}
+</script>
+{% endblock %}
