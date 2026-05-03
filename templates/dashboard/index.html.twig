@@ -217,14 +217,14 @@ option { background: #1a1a1a; }
   {# ── Weekly overview ── #}
   <div class="card">
     <div class="card-title">Letzte 4 Wochen</div>
-    {% set maxCount = weeklyData|map(w => w.count)|max %}
+    {% set maxCount = max(weeklyData|map(w => w.count)) %}
     <div class="week-bars">
       {% for week in weeklyData %}
         {% set heightPct = maxCount > 0 ? (week.count / maxCount * 100)|round : 0 %}
         <div class="week-bar-wrap">
           <div class="week-count">{{ week.count }}</div>
           <div class="week-bar {% if week.count > 0 %}has-data{% endif %}"
-               style="height:{{ [heightPct, 10]|max }}%; {% if week.count > 0 %}--accent: #{{ ['C9184A','4CAF7D','E09F3E','4361EE']|random }};{% endif %}"></div>
+               style="height:{{ max(heightPct, 10) }}%; {% if week.count > 0 %}--accent: #{{ ['C9184A','4CAF7D','E09F3E','4361EE']|random }};{% endif %}"></div>
           <div class="week-label">{{ week.label }}</div>
         </div>
       {% endfor %}
