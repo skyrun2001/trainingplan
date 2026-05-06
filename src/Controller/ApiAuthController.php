@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ApiAuthController extends AbstractController
@@ -18,14 +19,30 @@ class ApiAuthController extends AbstractController
         Request                     $request,
         UserRepository              $users,
         UserPasswordHasherInterface $hasher,
-        EntityManagerInterface      $em
+        EntityManagerInterface      $em,
+        RateLimiterFactory          $apiLoginLimiter
     ): JsonResponse {
+        // 5 attempts per IP per 15 minutes
+        $limiter = $apiLoginLimiter->create($request->getClientIp());
+        if (!$limiter->consume(1)->isAccepted()) {
+            return $this->json(['error' => 'Too many login attempts. Try again later.'], 429);
+        }
+
         $data     = json_decode($request->getContent(), true) ?? [];
-        $username = trim($data['username'] ?? '');
+        $username = mb_substr(trim($data['username'] ?? ''), 0, 80);
         $password = $data['password'] ?? '';
 
         $user = $users->findOneBy(['username' => $username]);
-        if (!$user || !$hasher->isPasswordValid($user, $password)) {
+
+        // Always run isPasswordValid even on unknown user to prevent timing attacks
+        $dummyValid = false;
+        if (!$user) {
+            $hasher->hashPassword(new \App\Entity\User(), 'dummy');
+        } else {
+            $dummyValid = $hasher->isPasswordValid($user, $password);
+        }
+
+        if (!$user || !$dummyValid) {
             return $this->json(['error' => 'Invalid credentials'], 401);
         }
 

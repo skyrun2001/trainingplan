@@ -48,21 +48,33 @@ class WorkoutController extends AbstractController
             return $this->json(['error' => 'Ungültige Daten'], 400);
         }
 
+        // Validate type to prevent arbitrary string injection
+        $validTypes = ['push', 'pull', 'legs', 'upper', 'custom'];
+        $type = in_array($data['type'], $validTypes, true) ? $data['type']
+            : preg_replace('/[^a-z0-9_]/', '', strtolower($data['type']));
+
         $session = new WorkoutSession();
-        $session->setType($data['type']);
-        $session->setDate(new \DateTime($data['date'] ?? 'today'));
-        $session->setDurationMinutes($data['duration'] ?? null);
-        $session->setNotes($data['notes'] ?? null);
+        $session->setType($type);
+        try {
+            $session->setDate(new \DateTime($data['date'] ?? 'today'));
+        } catch (\Exception) {
+            $session->setDate(new \DateTime('today'));
+        }
+        $session->setDurationMinutes(isset($data['duration']) ? max(1, min(600, (int) $data['duration'])) : null);
+        $session->setNotes(mb_substr(trim($data['notes'] ?? ''), 0, 1000) ?: null);
         $session->setUser($this->getUser());
 
+        $setCount = 0;
         foreach ($data['exercises'] as $exerciseName => $sets) {
-            foreach ($sets as $setData) {
+            $exerciseName = mb_substr(trim((string) $exerciseName), 0, 150);
+            foreach ((array) $sets as $setData) {
+                if (++$setCount > 200) break 2; // cap to prevent DoS
                 $log = new ExerciseLog();
                 $log->setExerciseName($exerciseName);
-                $log->setSetNumber($setData['set'] ?? 1);
-                $log->setReps($setData['reps'] ?? null);
-                $log->setWeightKg($setData['weight'] ?? null);
-                $log->setRpe($setData['rpe'] ?? null);
+                $log->setSetNumber(max(1, min(99, (int) ($setData['set'] ?? 1))));
+                $log->setReps(isset($setData['reps']) ? max(1, min(9999, (int) $setData['reps'])) : null);
+                $log->setWeightKg(isset($setData['weight']) ? max(0, min(999, (float) $setData['weight'])) : null);
+                $log->setRpe(isset($setData['rpe']) ? max(1, min(10, (int) $setData['rpe'])) : null);
                 $session->addExerciseLog($log);
             }
         }
