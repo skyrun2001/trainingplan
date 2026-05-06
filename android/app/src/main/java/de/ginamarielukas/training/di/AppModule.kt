@@ -5,9 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import de.ginamarielukas.training.data.api.ApiService
+import de.ginamarielukas.training.data.api.TokenHolder
 import de.ginamarielukas.training.data.api.buildApiService
-import de.ginamarielukas.training.data.prefs.AppPrefs
-import kotlinx.coroutines.runBlocking
 import javax.inject.Singleton
 
 @Module
@@ -16,6 +15,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideApiService(prefs: AppPrefs): ApiService =
-        buildApiService { runBlocking { prefs.getToken() } }
+    fun provideApiService(tokenHolder: TokenHolder): ApiService =
+        buildApiService(tokenHolder)
 }

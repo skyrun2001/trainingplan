@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.ginamarielukas.training.R
+import de.ginamarielukas.training.ui.UiText
 
 @Composable
 fun LoginScreen(
@@ -50,12 +52,13 @@ fun LoginScreen(
                 )
 
                 if (vm.error != null) {
+                    val ctx = LocalContext.current
                     Surface(
                         color  = MaterialTheme.colorScheme.errorContainer,
                         shape  = MaterialTheme.shapes.medium,
                     ) {
                         Text(
-                            text     = vm.error!!,
+                            text     = vm.error!!.asString(ctx),
                             modifier = Modifier.padding(12.dp),
                             color    = MaterialTheme.colorScheme.onErrorContainer,
                             fontSize = 13.sp,

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.ginamarielukas.training.R
 import de.ginamarielukas.training.data.model.WorkoutResponse
+import de.ginamarielukas.training.ui.UiText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +34,10 @@ fun DashboardScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text       = if (vm.username.isNotEmpty()) "Hallo, ${vm.username}!" else "Training",
+                        text       = if (vm.username.isNotEmpty())
+                            stringResource(R.string.dashboard_greeting, vm.username)
+                        else
+                            stringResource(R.string.app_name),
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -64,12 +69,13 @@ fun DashboardScreen(
         ) {
             if (vm.error != null) {
                 item {
+                    val ctx = LocalContext.current
                     Surface(
                         color = MaterialTheme.colorScheme.errorContainer,
                         shape = MaterialTheme.shapes.medium,
                     ) {
                         Text(
-                            text     = vm.error!!,
+                            text     = vm.error!!.asString(ctx),
                             modifier = Modifier.padding(12.dp),
                             color    = MaterialTheme.colorScheme.onErrorContainer,
                         )
@@ -80,7 +86,7 @@ fun DashboardScreen(
             // Health metrics
             item {
                 Text(
-                    text       = "Heute",
+                    text       = stringResource(R.string.label_today),
                     fontSize   = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     color      = MaterialTheme.colorScheme.primary,

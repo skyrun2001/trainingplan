@@ -3,6 +3,7 @@ package de.ginamarielukas.training
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -45,8 +46,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var prefs: AppPrefs
     @Inject lateinit var health: HealthConnectManager
 
-    // Tracks whether biometric/PIN was verified this session
-    private var sessionUnlocked = mutableStateOf(false)
+    private val mainViewModel: MainViewModel by viewModels()
 
     private var onPermissionResult: ((Boolean) -> Unit)? = null
 
@@ -72,19 +72,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Re-lock when app comes back from background
-    override fun onResume() {
-        super.onResume()
-        // Only re-lock if the user was already authenticated at least once
-        // (avoids double-prompt on cold start)
-    }
-
     // ── Root composable ───────────────────────────────────────────────────────
 
     @Composable
     private fun AppRoot() {
         var startRoute by remember { mutableStateOf<String?>(null) }
-        val unlocked   by sessionUnlocked
+        val unlocked   by mainViewModel.sessionUnlocked.collectAsState()
 
         LaunchedEffect(Unit) {
             val hasToken = prefs.tokenFlow.first() != null
@@ -99,11 +92,10 @@ class MainActivity : AppCompatActivity() {
                     CircularProgressIndicator()
                 }
             }
-            // If user is logged in but session not unlocked → show biometric gate
             startRoute != ROUTE_LOGIN && !unlocked -> {
                 BiometricLockScreen(
-                    onUnlocked = { sessionUnlocked.value = true },
-                    onFallback = { sessionUnlocked.value = true }, // allow pure PIN devices
+                    onUnlocked = { mainViewModel.unlock() },
+                    onFallback = { mainViewModel.unlock() },
                 )
             }
             else -> {
@@ -123,8 +115,7 @@ class MainActivity : AppCompatActivity() {
                 LoginScreen(onLoginSuccess = {
                     lifecycleScope.launch {
                         val dest = if (health.hasAllPermissions()) ROUTE_DASHBOARD else ROUTE_PERMISSIONS
-                        // After fresh login, no biometric needed for this session
-                        sessionUnlocked.value = true
+                        mainViewModel.unlock()
                         navController.navigate(dest) { popUpTo(ROUTE_LOGIN) { inclusive = true } }
                     }
                 })
@@ -138,7 +129,7 @@ class MainActivity : AppCompatActivity() {
             }
             composable(ROUTE_DASHBOARD) {
                 DashboardScreen(onLogout = {
-                    sessionUnlocked.value = false
+                    mainViewModel.lock()
                     navController.navigate(ROUTE_LOGIN) {
                         popUpTo(ROUTE_DASHBOARD) { inclusive = true }
                     }
@@ -156,6 +147,9 @@ class MainActivity : AppCompatActivity() {
     ) {
         var errorMsg by remember { mutableStateOf<String?>(null) }
 
+        val lockTitle    = stringResource(R.string.lock_title)
+        val lockSubtitle = stringResource(R.string.lock_subtitle)
+
         val prompt = remember {
             BiometricPrompt(
                 this,
@@ -166,7 +160,6 @@ class MainActivity : AppCompatActivity() {
                         onUnlocked()
                     }
                     override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                        // User cancelled or hardware unavailable — show manual button
                         if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
                             errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
                         ) {
@@ -174,31 +167,29 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     override fun onAuthenticationFailed() {
-                        // Wrong finger/face — prompt stays open, do nothing
+                        // Wrong finger/face — prompt stays open
                     }
                 }
             )
         }
 
-        val promptInfo = remember {
+        val promptInfo = remember(lockTitle, lockSubtitle) {
             val canBiometric = BiometricManager.from(this)
                 .canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
 
             BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Training gesperrt")
-                .setSubtitle("Bitte Identität bestätigen")
+                .setTitle(lockTitle)
+                .setSubtitle(lockSubtitle)
                 .apply {
                     if (canBiometric == BiometricManager.BIOMETRIC_SUCCESS) {
                         setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
                     } else {
-                        // No biometric enrolled; fall through to PIN only
                         setAllowedAuthenticators(DEVICE_CREDENTIAL)
                     }
                 }
                 .build()
         }
 
-        // Auto-trigger prompt when composable appears
         LaunchedEffect(Unit) {
             val canAuth = BiometricManager.from(this@MainActivity)
                 .canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
@@ -207,7 +198,6 @@ class MainActivity : AppCompatActivity() {
             ) {
                 prompt.authenticate(promptInfo)
             } else {
-                // Device has no lock screen at all — allow through
                 onFallback()
             }
         }
@@ -221,19 +211,19 @@ class MainActivity : AppCompatActivity() {
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 Icon(
-                    imageVector         = Icons.Default.Lock,
-                    contentDescription  = null,
-                    modifier            = Modifier.size(64.dp),
-                    tint                = MaterialTheme.colorScheme.primary,
+                    imageVector        = Icons.Default.Lock,
+                    contentDescription = null,
+                    modifier           = Modifier.size(64.dp),
+                    tint               = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    text       = "App gesperrt",
+                    text       = stringResource(R.string.lock_locked),
                     fontSize   = 22.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign  = TextAlign.Center,
                 )
                 Text(
-                    text      = "Verwende Fingerabdruck, Gesicht oder PIN, um fortzufahren.",
+                    text      = stringResource(R.string.lock_hint),
                     fontSize  = 14.sp,
                     textAlign = TextAlign.Center,
                     color     = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -255,7 +245,7 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Entsperren", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.lock_btn), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -290,7 +280,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 if (denied) {
                     Text(
-                        text      = "Bitte erlaube den Zugriff in den Einstellungen.",
+                        text      = stringResource(R.string.permission_denied),
                         fontSize  = 13.sp,
                         color     = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,

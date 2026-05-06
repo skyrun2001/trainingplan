@@ -1,23 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Training</string>
-    <string name="login_title">Willkommen zurück</string>
-    <string name="login_subtitle">Melde dich mit deinen Zugangsdaten an</string>
-    <string name="label_username">Benutzername</string>
-    <string name="label_password">Passwort</string>
-    <string name="btn_login">Einloggen</string>
-    <string name="error_invalid_credentials">Ungültige Anmeldedaten</string>
-    <string name="error_connection">Verbindungsfehler – Server erreichbar?</string>
-    <string name="permission_title">Gesundheitsdaten</string>
-    <string name="permission_rationale">Die App liest deine Schritte, Schlaf und aktive Minuten aus Google Health Connect, um sie mit deinem Trainingsplan zu verknüpfen.</string>
-    <string name="btn_grant_permissions">Zugriff erlauben</string>
-    <string name="dashboard_greeting">Hallo, %1$s!</string>
-    <string name="steps_label">Schritte heute</string>
-    <string name="sleep_label">Schlaf letzte Nacht</string>
-    <string name="active_label">Aktive Minuten</string>
-    <string name="workouts_label">Letzte Trainings</string>
-    <string name="btn_refresh">Aktualisieren</string>
-    <string name="btn_logout">Abmelden</string>
-    <string name="synced">Mit Server synchronisiert</string>
+
+    <!-- Login -->
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in with your credentials</string>
+    <string name="label_username">Username</string>
+    <string name="label_password">Password</string>
+    <string name="btn_login">Log In</string>
+    <string name="error_invalid_credentials">Invalid credentials</string>
+    <string name="error_connection">Connection error – is the server reachable?</string>
+    <string name="error_loading">Error loading data</string>
+
+    <!-- Health permissions -->
+    <string name="permission_title">Health Data</string>
+    <string name="permission_rationale">The app reads your steps, sleep, and active minutes from Google Health Connect to link them with your training plan.</string>
+    <string name="btn_grant_permissions">Allow Access</string>
+    <string name="permission_denied">Please allow access in Settings.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_greeting">Hello, %1$s!</string>
+    <string name="label_today">Today</string>
+    <string name="steps_label">Steps today</string>
+    <string name="sleep_label">Sleep last night</string>
+    <string name="active_label">Active minutes</string>
+    <string name="workouts_label">Recent workouts</string>
+    <string name="btn_refresh">Refresh</string>
+    <string name="btn_logout">Log Out</string>
+    <string name="synced">Synced with server</string>
     <string name="minutes_short">min</string>
+
+    <!-- Biometric lock screen -->
+    <string name="lock_title">Training Locked</string>
+    <string name="lock_subtitle">Please confirm your identity</string>
+    <string name="lock_locked">App Locked</string>
+    <string name="lock_hint">Use fingerprint, face, or PIN to continue.</string>
+    <string name="lock_btn">Unlock</string>
 </resources>
