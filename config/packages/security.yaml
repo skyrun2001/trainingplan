@@ -13,6 +13,14 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|assets|build)/
             security: false
+        api_public:
+            pattern: ^/api/auth
+            security: false
+        api:
+            pattern: ^/api/health
+            stateless: true
+            custom_authenticators:
+                - App\Security\ApiTokenAuthenticator
         main:
             lazy: true
             provider: app_user_provider
@@ -31,8 +39,10 @@ security:
                 lifetime: 604800
 
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/,      roles: ROLE_USER }
+        - { path: ^/api/auth,   roles: PUBLIC_ACCESS }
+        - { path: ^/api/health, roles: ROLE_USER }
+        - { path: ^/login,      roles: PUBLIC_ACCESS }
+        - { path: ^/,           roles: ROLE_USER }
 
 when@test:
     security:
