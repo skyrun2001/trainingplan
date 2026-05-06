@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ExerciseLogRepository;
+use App\Repository\HealthDataRepository;
 use App\Repository\WorkoutSessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +19,8 @@ class DashboardController extends AbstractController
     #[Route('/dashboard', name: 'app_dashboard')]
     public function index(
         WorkoutSessionRepository $sessionRepo,
-        ExerciseLogRepository    $exerciseRepo
+        ExerciseLogRepository    $exerciseRepo,
+        HealthDataRepository     $healthRepo
     ): Response {
         $user           = $this->getUser();
         $recentSessions = $sessionRepo->findRecentForUser($user, 30);
@@ -36,17 +38,23 @@ class DashboardController extends AbstractController
         );
         $weeklyData = $this->buildWeeklyData($last4Weeks);
 
+        $healthHistory = $healthRepo->findRecentForUser($user, 7);
+        $healthChartData = array_map(fn($h) => $h->toArray(), array_reverse($healthHistory));
+
         return $this->render('dashboard/index.html.twig', [
-            'sessions'      => $recentSessions,
-            'streak'        => $streak,
-            'typeMap'       => $typeMap,
-            'totalSessions' => array_sum(array_column($countByType, 'cnt')),
-            'personalBests' => $personalBests,
-            'weeklyData'    => $weeklyData,
-            'exerciseNames' => $exerciseRepo->findAllExerciseNamesForUser($user),
-            'weekDays'      => $this->buildCurrentWeek($sessionRepo),
-            'schedule'      => $user->getWeekSchedule(),
-            'reminderTime'  => $user->getReminderTime(),
+            'sessions'        => $recentSessions,
+            'streak'          => $streak,
+            'typeMap'         => $typeMap,
+            'totalSessions'   => array_sum(array_column($countByType, 'cnt')),
+            'personalBests'   => $personalBests,
+            'weeklyData'      => $weeklyData,
+            'exerciseNames'   => $exerciseRepo->findAllExerciseNamesForUser($user),
+            'weekDays'        => $this->buildCurrentWeek($sessionRepo),
+            'schedule'        => $user->getWeekSchedule(),
+            'reminderTime'    => $user->getReminderTime(),
+            'todayHealth'     => $healthRepo->findByUserAndDate($user, new \DateTime('today')),
+            'healthHistory'   => $healthHistory,
+            'healthChartData' => $healthChartData,
         ]);
     }
 

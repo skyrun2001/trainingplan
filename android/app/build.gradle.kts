@@ -63,4 +63,6 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.health.connect)
+    implementation(libs.biometric)
+    implementation(libs.appcompat)
 }
