@@ -22,20 +22,24 @@ class WorkoutController extends AbstractController
     #[Route('/log', name: 'app_log')]
     public function index(Request $request): Response
     {
-        $type = $request->query->get('type', 'push');
+        // Sanitize type — only alphanumeric/underscore, so it's safe inside JS literals
+        $type = preg_replace('/[^a-z0-9_]/', '', strtolower($request->query->get('type', 'push')));
         $plan = $this->seeder->seedIfNeeded($this->getUser());
 
-        $day  = $plan->getDayByType($type);
+        $day = $plan->getDayByType($type);
         if (!$day) {
-            // Fall back to first day if type doesn't exist
             $day  = $plan->getDays()->first() ?: null;
             $type = $day?->getType() ?? 'push';
         }
 
+        $exercises = $day ? $day->getExercisesAsArray() : [];
+
         return $this->render('log/index.html.twig', [
-            'type'      => $type,
-            'exercises' => $day ? $day->getExercisesAsArray() : [],
-            'plan'      => $plan,
+            'type'          => $type,
+            'exercises'     => $exercises,
+            // Pre-encoded with JSON_HEX_TAG so </script> in exercise names cannot break out
+            'exercisesJson' => json_encode($exercises, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR),
+            'plan'          => $plan,
         ]);
     }
 

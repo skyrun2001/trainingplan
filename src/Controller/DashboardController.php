@@ -38,23 +38,24 @@ class DashboardController extends AbstractController
         );
         $weeklyData = $this->buildWeeklyData($last4Weeks);
 
-        $healthHistory = $healthRepo->findRecentForUser($user, 7);
+        $healthHistory   = $healthRepo->findRecentForUser($user, 7);
         $healthChartData = array_map(fn($h) => $h->toArray(), array_reverse($healthHistory));
 
         return $this->render('dashboard/index.html.twig', [
-            'sessions'        => $recentSessions,
-            'streak'          => $streak,
-            'typeMap'         => $typeMap,
-            'totalSessions'   => array_sum(array_column($countByType, 'cnt')),
-            'personalBests'   => $personalBests,
-            'weeklyData'      => $weeklyData,
-            'exerciseNames'   => $exerciseRepo->findAllExerciseNamesForUser($user),
-            'weekDays'        => $this->buildCurrentWeek($sessionRepo),
-            'schedule'        => $user->getWeekSchedule(),
-            'reminderTime'    => $user->getReminderTime(),
-            'todayHealth'     => $healthRepo->findByUserAndDate($user, new \DateTime('today')),
-            'healthHistory'   => $healthHistory,
-            'healthChartData' => $healthChartData,
+            'sessions'         => $recentSessions,
+            'streak'           => $streak,
+            'typeMap'          => $typeMap,
+            'totalSessions'    => array_sum(array_column($countByType, 'cnt')),
+            'personalBests'    => $personalBests,
+            'weeklyData'       => $weeklyData,
+            'exerciseNames'    => $exerciseRepo->findAllExerciseNamesForUser($user),
+            'weekDays'         => $this->buildCurrentWeek($sessionRepo),
+            'schedule'         => $user->getWeekSchedule(),
+            'reminderTime'     => $user->getReminderTime(),
+            'todayHealth'      => $healthRepo->findByUserAndDate($user, new \DateTime('today')),
+            'healthHistory'    => $healthHistory,
+            // Pre-encoded with JSON_HEX_TAG so </script> in any string field cannot escape the tag
+            'healthChartJson'  => json_encode($healthChartData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR),
         ]);
     }
 

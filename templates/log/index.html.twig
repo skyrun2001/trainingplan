@@ -320,8 +320,8 @@
 
 {% block scripts %}
 <script>
-const TYPE = '{{ type }}';
-const EXERCISES = {{ exercises|json_encode|raw }};
+const TYPE = {{ type|json_encode }};
+const EXERCISES = {{ exercisesJson|raw }};
 let prevWeights = {};
 
 // Load previous weights from last session
@@ -333,14 +333,19 @@ fetch('/api/last-weights/{{ type }}')
       const name = card.dataset.name;
       const hint = document.getElementById('prev-' + (idx + 1));
       if (hint && data[name]) {
-        hint.innerHTML = `Letzte Session: <span>${data[name].weight} kg × ${data[name].reps} Wdh (${data[name].date})</span>`;
-        // Pre-fill weight inputs with previous value
+        const span = document.createElement('span');
+        span.textContent = `${data[name].weight} kg × ${data[name].reps} Wdh (${data[name].date})`;
+        hint.textContent = 'Letzte Session: ';
+        hint.appendChild(span);
         card.querySelectorAll('.weight-input').forEach(inp => {
           inp.value = data[name].weight;
           inp.classList.add('filled');
         });
       } else if (hint) {
-        hint.innerHTML = 'Letzte Session: <span>Noch keine Daten</span>';
+        const span = document.createElement('span');
+        span.textContent = 'Noch keine Daten';
+        hint.textContent = 'Letzte Session: ';
+        hint.appendChild(span);
       }
     });
   })
@@ -357,19 +362,39 @@ function toggleSets(header) {
 
 function addSet(idx) {
   const rows = document.getElementById('rows-' + idx);
-  const setNum = rows.querySelectorAll('.set-row').length + 1;
-  const prevWeight = rows.querySelector('.weight-input:last-of-type')?.value || '';
-  const prevReps   = rows.querySelector('.reps-input:last-of-type')?.value || '';
+  const setNum    = rows.querySelectorAll('.set-row').length + 1;
+  // Parse as numbers so no HTML can be injected when we set .value
+  const prevWeight = parseFloat(rows.querySelector('.weight-input:last-of-type')?.value) || '';
+  const prevReps   = parseInt(rows.querySelector('.reps-input:last-of-type')?.value, 10)  || '';
+
   const row = document.createElement('div');
   row.className = 'set-row';
-  row.innerHTML = `
-    <span class="set-label">${setNum}</span>
-    <input type="number" class="set-input reps-input" placeholder="Wdh" min="1" max="99"
-           value="${prevReps}" data-set="${setNum}" oninput="updateSummary(${idx})">
-    <input type="number" class="set-input weight-input" placeholder="kg" min="0" max="999" step="0.5"
-           value="${prevWeight}" data-set="${setNum}" oninput="onWeightInput(this); updateSummary(${idx})">
-    <input type="number" class="set-input rpe-input" placeholder="—" min="1" max="10" data-set="${setNum}">
-    <button class="remove-set" onclick="removeSet(this)" title="Satz löschen">×</button>`;
+  // Build row via DOM — no innerHTML with variable content
+  const label = document.createElement('span');
+  label.className = 'set-label';
+  label.textContent = setNum;
+
+  const repsIn = document.createElement('input');
+  Object.assign(repsIn, { type:'number', className:'set-input reps-input', placeholder:'Wdh', min:1, max:99, value: prevReps });
+  repsIn.dataset.set = setNum;
+  repsIn.setAttribute('oninput', `updateSummary(${idx})`);
+
+  const weightIn = document.createElement('input');
+  Object.assign(weightIn, { type:'number', className:'set-input weight-input', placeholder:'kg', min:0, max:999, step:0.5, value: prevWeight });
+  weightIn.dataset.set = setNum;
+  weightIn.setAttribute('oninput', `onWeightInput(this); updateSummary(${idx})`);
+
+  const rpeIn = document.createElement('input');
+  Object.assign(rpeIn, { type:'number', className:'set-input rpe-input', placeholder:'—', min:1, max:10 });
+  rpeIn.dataset.set = setNum;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-set';
+  removeBtn.title = 'Satz löschen';
+  removeBtn.textContent = '×';
+  removeBtn.setAttribute('onclick', 'removeSet(this)');
+
+  row.append(label, repsIn, weightIn, rpeIn, removeBtn);
   rows.appendChild(row);
   if (prevWeight) row.querySelector('.weight-input').classList.add('filled');
   updateSummary(idx);

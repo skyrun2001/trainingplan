@@ -600,7 +600,7 @@ if (firstEx?.options.length > 1) { firstEx.selectedIndex = 1; loadChart(firstEx.
 // ── Health chart ─────────────────────────────────────────────────────────────
 {% if healthHistory|length > 1 %}
 (function() {
-  const raw = {{ healthChartData|json_encode|raw }};
+  const raw = {{ healthChartJson|raw }};
   const canvas = document.getElementById('healthChart');
   if (!canvas) return;
   new Chart(canvas, {
