@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\HealthData;
 use App\Repository\ExerciseLogRepository;
 use App\Repository\HealthDataRepository;
 use App\Repository\WorkoutSessionRepository;
@@ -38,7 +39,7 @@ class DashboardController extends AbstractController
         );
         $weeklyData = $this->buildWeeklyData($last4Weeks);
 
-        $healthHistory   = $healthRepo->findRecentForUser($user, 7);
+        $healthHistory   = $healthRepo->findRecentForUser($user, 30);
         $healthChartData = array_map(fn($h) => $h->toArray(), array_reverse($healthHistory));
 
         return $this->render('dashboard/index.html.twig', [
@@ -57,6 +58,42 @@ class DashboardController extends AbstractController
             // Pre-encoded with JSON_HEX_TAG so </script> in any string field cannot escape the tag
             'healthChartJson'  => json_encode($healthChartData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR),
         ]);
+    }
+
+    #[Route('/health/save', name: 'health_save', methods: ['POST'])]
+    public function saveHealth(
+        Request                $request,
+        HealthDataRepository   $repo,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        $dateStr = $data['date'] ?? (new \DateTime())->format('Y-m-d');
+        try {
+            $date = new \DateTime($dateStr);
+        } catch (\Exception) {
+            return $this->json(['error' => 'Ungültiges Datum'], 400);
+        }
+
+        if ($date > new \DateTime('today')) {
+            return $this->json(['error' => 'Kein Datum in der Zukunft'], 400);
+        }
+
+        $record = $repo->findByUserAndDate($user, $date)
+            ?? (new HealthData())->setUser($user)->setDate($date);
+
+        if (isset($data['weightKg']) && $data['weightKg'] !== '')
+            $record->setWeightKg(max(20.0, min(300.0, (float) $data['weightKg'])));
+        if (isset($data['caloriesKcal']) && $data['caloriesKcal'] !== '')
+            $record->setCaloriesKcal(max(0, min(10_000, (int) $data['caloriesKcal'])));
+        if (isset($data['steps']) && $data['steps'] !== '')
+            $record->setSteps(max(0, min(200_000, (int) $data['steps'])));
+
+        $em->persist($record);
+        $em->flush();
+
+        return $this->json(['success' => true, 'data' => $record->toArray()]);
     }
 
     #[Route('/api/settings', name: 'api_settings', methods: ['PATCH'])]

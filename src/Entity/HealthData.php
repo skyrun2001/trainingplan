@@ -31,6 +31,12 @@ class HealthData
     #[ORM\Column(nullable: true)]
     private ?int $activeMinutes = null;
 
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $weightKg = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $caloriesKcal = null;
+
     public function getId(): ?int { return $this->id; }
 
     public function getUser(): User { return $this->user; }
@@ -48,6 +54,12 @@ class HealthData
     public function getActiveMinutes(): ?int { return $this->activeMinutes; }
     public function setActiveMinutes(?int $activeMinutes): static { $this->activeMinutes = $activeMinutes; return $this; }
 
+    public function getWeightKg(): ?float { return $this->weightKg; }
+    public function setWeightKg(?float $weightKg): static { $this->weightKg = $weightKg; return $this; }
+
+    public function getCaloriesKcal(): ?int { return $this->caloriesKcal; }
+    public function setCaloriesKcal(?int $caloriesKcal): static { $this->caloriesKcal = $caloriesKcal; return $this; }
+
     public function toArray(): array
     {
         return [
@@ -55,6 +67,8 @@ class HealthData
             'steps'         => $this->steps,
             'sleepMinutes'  => $this->sleepMinutes,
             'activeMinutes' => $this->activeMinutes,
+            'weightKg'      => $this->weightKg,
+            'caloriesKcal'  => $this->caloriesKcal,
         ];
     }
 }

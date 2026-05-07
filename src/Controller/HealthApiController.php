@@ -31,9 +31,16 @@ class HealthApiController extends AbstractController
 
         $record = $repo->findByUserAndDate($user, $date) ?? (new HealthData())->setUser($user)->setDate($date);
 
-        if (array_key_exists('steps', $data))         $record->setSteps($data['steps'] !== null ? (int) $data['steps'] : null);
-        if (array_key_exists('sleepMinutes', $data))   $record->setSleepMinutes($data['sleepMinutes'] !== null ? (int) $data['sleepMinutes'] : null);
-        if (array_key_exists('activeMinutes', $data))  $record->setActiveMinutes($data['activeMinutes'] !== null ? (int) $data['activeMinutes'] : null);
+        if (array_key_exists('steps', $data))
+            $record->setSteps($data['steps'] !== null ? max(0, min(200_000, (int) $data['steps'])) : null);
+        if (array_key_exists('sleepMinutes', $data))
+            $record->setSleepMinutes($data['sleepMinutes'] !== null ? max(0, min(1440, (int) $data['sleepMinutes'])) : null);
+        if (array_key_exists('activeMinutes', $data))
+            $record->setActiveMinutes($data['activeMinutes'] !== null ? max(0, min(1440, (int) $data['activeMinutes'])) : null);
+        if (array_key_exists('weightKg', $data))
+            $record->setWeightKg($data['weightKg'] !== null ? max(20.0, min(300.0, (float) $data['weightKg'])) : null);
+        if (array_key_exists('caloriesKcal', $data))
+            $record->setCaloriesKcal($data['caloriesKcal'] !== null ? max(0, min(10_000, (int) $data['caloriesKcal'])) : null);
 
         $em->persist($record);
         $em->flush();
