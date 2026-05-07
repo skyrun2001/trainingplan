@@ -1,5 +1,0 @@
--keep class de.ginamarielukas.training.data.model.** { *; }
--keepattributes Signature
--keepattributes *Annotation*
--dontwarn okhttp3.**
--dontwarn retrofit2.**
