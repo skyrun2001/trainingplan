@@ -19,6 +19,7 @@
         "symfony/form": "^8.0",
         "symfony/framework-bundle": "8.0.*",
         "symfony/property-access": "^8.0",
+        "symfony/rate-limiter": "*",
         "symfony/runtime": "8.0.*",
         "symfony/security-bundle": "8.0.*",
         "symfony/serializer": "^8.0",

@@ -160,6 +160,74 @@ option { background: #1a1a1a; }
 .type-stat { border-radius: 10px; padding: 12px 10px; text-align: center; }
 .type-stat-val { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
 .type-stat-lbl { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+/* ── Health ── */
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.health-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.health-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.health-icon  { font-size: 22px; margin-bottom: 6px; }
+.health-value { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; line-height: 1; }
+.health-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.health-empty {
+  text-align: center; padding: 28px 16px; color: var(--muted); font-size: 13px;
+  border: 1px dashed var(--border); border-radius: 12px;
+}
+.health-meta { font-size: 11px; color: var(--muted); margin-top: 10px; display:flex; align-items:center; gap:6px; }
+.health-dot  { width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block; }
+
+/* ── Health entry form ── */
+.health-entry-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; cursor: pointer; color: var(--dim); font-size: 12px;
+  border-top: 1px solid var(--border); margin-top: 4px;
+  user-select: none;
+}
+.health-entry-toggle:hover { color: var(--text); }
+.health-entry-form {
+  display: none; padding-top: 12px;
+}
+.health-entry-form.open { display: block; }
+.health-entry-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;
+}
+.health-input-group { display: flex; flex-direction: column; gap: 4px; }
+.health-input-group label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.health-input {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 13px;
+  padding: 8px 10px; width: 100%; box-sizing: border-box;
+}
+.health-input:focus { outline: none; border-color: var(--text); }
+
+/* ── Health charts ── */
+.health-tab-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+.health-tab {
+  font-size: 11px; padding: 4px 12px; border-radius: 20px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--muted); cursor: pointer; font-family: 'Space Mono', monospace;
+  transition: all 0.15s;
+}
+.health-tab.active { background: var(--text); color: #000; border-color: var(--text); }
+.health-chart-wrap { position: relative; height: 130px; }
+.health-chart-panel { display: none; }
+.health-chart-panel.active { display: block; }
 </style>
 {% endblock %}
 
@@ -270,6 +338,124 @@ option { background: #1a1a1a; }
       <span class="notif-badge" id="notifBadge">Klicken zum Erlauben</span>
       <button class="btn btn-ghost btn-sm" onclick="requestNotifPermission()">Erlauben</button>
       <span style="font-size:11px;color:var(--muted)">* Erinnerung nur bei geöffnetem Browser</span>
+    </div>
+  </div>
+
+  {# ── Health data ── #}
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Gesundheit</span>
+      <span style="font-size:11px;color:var(--muted)">Heute, {{ "now"|date('d.m.Y') }}</span>
+    </div>
+
+    {# — Today cards: steps, sleep, active — #}
+    <div class="health-grid">
+      <div class="health-card">
+        <div class="health-icon">👣</div>
+        <div class="health-value" style="color:#6DB6FF" id="hv-steps">
+          {% if todayHealth and todayHealth.steps is not null %}
+            {{ (todayHealth.steps / 1000)|number_format(1) }}k
+          {% else %}—{% endif %}
+        </div>
+        <div class="health-label">Schritte</div>
+      </div>
+      <div class="health-card">
+        <div class="health-icon">💤</div>
+        <div class="health-value" style="color:#9C84F7" id="hv-sleep">
+          {% if todayHealth and todayHealth.sleepMinutes is not null %}
+            {{ (todayHealth.sleepMinutes / 60)|round(0, 'floor') }}h {{ todayHealth.sleepMinutes % 60 }}m
+          {% else %}—{% endif %}
+        </div>
+        <div class="health-label">Schlaf</div>
+      </div>
+      <div class="health-card">
+        <div class="health-icon">🏃</div>
+        <div class="health-value" style="color:var(--green)" id="hv-active">
+          {% if todayHealth and todayHealth.activeMinutes is not null %}
+            {{ todayHealth.activeMinutes }}<span style="font-size:12px;font-weight:400">m</span>
+          {% else %}—{% endif %}
+        </div>
+        <div class="health-label">Aktiv Min</div>
+      </div>
+    </div>
+
+    {# — Today cards: weight + calories — #}
+    <div class="health-grid-2">
+      <div class="health-card">
+        <div class="health-icon">⚖️</div>
+        <div class="health-value" style="color:var(--legs)" id="hv-weight">
+          {% if todayHealth and todayHealth.weightKg is not null %}
+            {{ todayHealth.weightKg|number_format(1) }}<span style="font-size:12px;font-weight:400"> kg</span>
+          {% else %}—{% endif %}
+        </div>
+        <div class="health-label">Gewicht</div>
+      </div>
+      <div class="health-card">
+        <div class="health-icon">🔥</div>
+        <div class="health-value" style="color:#FF8C42" id="hv-cal">
+          {% if todayHealth and todayHealth.caloriesKcal is not null %}
+            {{ todayHealth.caloriesKcal }}<span style="font-size:12px;font-weight:400"> kcal</span>
+          {% else %}—{% endif %}
+        </div>
+        <div class="health-label">Kalorien</div>
+      </div>
+    </div>
+
+    {# — Manual entry form — #}
+    <div class="health-entry-toggle" onclick="toggleHealthForm()" id="healthToggle">
+      <span>✎ Daten erfassen</span>
+      <span id="healthToggleArrow">▼</span>
+    </div>
+    <div class="health-entry-form" id="healthForm">
+      <div class="health-entry-row">
+        <div class="health-input-group">
+          <label>Datum</label>
+          <input type="date" class="health-input" id="healthDate"
+                 value="{{ "now"|date('Y-m-d') }}"
+                 max="{{ "now"|date('Y-m-d') }}">
+        </div>
+        <div class="health-input-group">
+          <label>Gewicht (kg)</label>
+          <input type="number" class="health-input" id="healthWeight"
+                 placeholder="z.B. 78.5" min="20" max="300" step="0.1"
+                 value="{{ todayHealth and todayHealth.weightKg is not null ? todayHealth.weightKg : '' }}">
+        </div>
+        <div class="health-input-group">
+          <label>Kalorien (kcal)</label>
+          <input type="number" class="health-input" id="healthCal"
+                 placeholder="z.B. 2200" min="0" max="10000" step="1"
+                 value="{{ todayHealth and todayHealth.caloriesKcal is not null ? todayHealth.caloriesKcal : '' }}">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="saveHealthEntry()" id="healthSaveBtn">Speichern</button>
+        <span id="healthSaveMsg" style="font-size:12px;color:var(--green);display:none">✓ Gespeichert</span>
+      </div>
+    </div>
+
+    {# — Charts — #}
+    {% if healthHistory|length > 1 %}
+      <div style="margin-top:16px">
+        <div class="health-tab-bar">
+          <button class="health-tab active" onclick="switchHealthTab('activity', this)">Aktivität</button>
+          <button class="health-tab" onclick="switchHealthTab('weight', this)">Gewicht</button>
+          <button class="health-tab" onclick="switchHealthTab('calories', this)">Kalorien</button>
+        </div>
+        <div class="health-chart-panel active" id="hp-activity">
+          <div class="health-chart-wrap"><canvas id="healthChartActivity"></canvas></div>
+        </div>
+        <div class="health-chart-panel" id="hp-weight">
+          <div class="health-chart-wrap"><canvas id="healthChartWeight"></canvas></div>
+        </div>
+        <div class="health-chart-panel" id="hp-calories">
+          <div class="health-chart-wrap"><canvas id="healthChartCalories"></canvas></div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="health-meta">
+      <span class="health-dot"></span>
+      Synchronisiert über Android App · Manuelle Eingabe möglich
     </div>
   </div>
 
@@ -516,6 +702,148 @@ function loadChart(name) {
 const firstEx = document.getElementById('exerciseSelect');
 if (firstEx?.options.length > 1) { firstEx.selectedIndex = 1; loadChart(firstEx.value); }
 {% endif %}
+
+// ── Health charts ────────────────────────────────────────────────────────────
+{% if healthHistory|length > 1 %}
+(function() {
+  const raw = {{ healthChartJson|raw }};
+  const labels = raw.map(d => { const [,m,day] = d.date.split('-'); return day + '.' + m; });
+
+  const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#666', font: { family: 'DM Sans', size: 10 }, boxWidth: 10 } },
+      tooltip: { backgroundColor: '#1a1a1a', titleColor: '#E8E4DE', bodyColor: '#888',
+                 borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1 },
+    },
+    scales: {
+      x: { ticks: { color: '#555', font: { family: 'Space Mono', size: 9 }, maxTicksLimit: 12 },
+           grid: { color: 'rgba(255,255,255,0.04)' } },
+    }
+  };
+
+  // Activity chart: steps (bars) + active minutes (line)
+  new Chart(document.getElementById('healthChartActivity'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Schritte', data: raw.map(d => d.steps ?? null),
+          backgroundColor: 'rgba(109,182,255,0.5)', borderColor: '#6DB6FF',
+          borderWidth: 1, borderRadius: 3, yAxisID: 'ySteps' },
+        { label: 'Aktiv Min', data: raw.map(d => d.activeMinutes ?? null),
+          type: 'line', borderColor: '#4CAF7D', backgroundColor: 'rgba(76,175,125,0.1)',
+          fill: true, tension: 0.35, pointRadius: 3, yAxisID: 'yActive' },
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales,
+      ySteps:  { position: 'left',  display: false },
+      yActive: { position: 'right', display: false },
+    }}
+  });
+
+  // Weight chart: line with spanGaps for days without data
+  new Chart(document.getElementById('healthChartWeight'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Gewicht (kg)', data: raw.map(d => d.weightKg ?? null),
+          borderColor: '#E0A03E', backgroundColor: 'rgba(224,160,62,0.12)',
+          fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#E0A03E',
+          spanGaps: true },
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales,
+      y: { ticks: { color: '#888', font: { family: 'Space Mono', size: 9 },
+                    callback: v => v + ' kg' },
+           grid: { color: 'rgba(255,255,255,0.04)' } },
+    }}
+  });
+
+  // Calories chart: bars
+  new Chart(document.getElementById('healthChartCalories'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Kalorien (kcal)', data: raw.map(d => d.caloriesKcal ?? null),
+          backgroundColor: 'rgba(255,140,66,0.5)', borderColor: '#FF8C42',
+          borderWidth: 1, borderRadius: 3 },
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales,
+      y: { ticks: { color: '#888', font: { family: 'Space Mono', size: 9 },
+                    callback: v => v + ' kcal' },
+           grid: { color: 'rgba(255,255,255,0.04)' } },
+    }}
+  });
+})();
+{% endif %}
+
+// ── Health tab switcher ───────────────────────────────────────────────────────
+function switchHealthTab(name, btn) {
+  document.querySelectorAll('.health-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.health-chart-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('hp-' + name).classList.add('active');
+}
+
+// ── Health manual entry ───────────────────────────────────────────────────────
+function toggleHealthForm() {
+  const form  = document.getElementById('healthForm');
+  const arrow = document.getElementById('healthToggleArrow');
+  const open  = form.classList.toggle('open');
+  arrow.textContent = open ? '▲' : '▼';
+}
+
+async function saveHealthEntry() {
+  const btn    = document.getElementById('healthSaveBtn');
+  const msg    = document.getElementById('healthSaveMsg');
+  const weight = document.getElementById('healthWeight').value.trim();
+  const cal    = document.getElementById('healthCal').value.trim();
+  const steps  = null; // steps come from app; not entered manually here
+  const date   = document.getElementById('healthDate').value;
+
+  if (!weight && !cal) { showToast('Bitte Gewicht oder Kalorien eingeben', 'error'); return; }
+
+  btn.disabled = true;
+  const payload = { date };
+  if (weight) payload.weightKg    = parseFloat(weight);
+  if (cal)    payload.caloriesKcal = parseInt(cal, 10);
+
+  try {
+    const r = await fetch('/health/save', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await r.json();
+    if (data.success) {
+      msg.style.display = 'inline';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+      // Update today's cards live if date is today
+      const today = new Date().toISOString().slice(0, 10);
+      if (date === today) {
+        if (data.data.weightKg !== null) {
+          document.getElementById('hv-weight').innerHTML =
+            data.data.weightKg.toFixed(1) + '<span style="font-size:12px;font-weight:400"> kg</span>';
+        }
+        if (data.data.caloriesKcal !== null) {
+          document.getElementById('hv-cal').innerHTML =
+            data.data.caloriesKcal + '<span style="font-size:12px;font-weight:400"> kcal</span>';
+        }
+      }
+    } else {
+      showToast(data.error ?? 'Fehler', 'error');
+    }
+  } catch (e) {
+    showToast('Verbindungsfehler', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
 
 // ── History delete ───────────────────────────────────────────────────────────
 function deleteSession(id) {

@@ -16,6 +16,14 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class PlanController extends AbstractController
 {
+    // Input length caps to prevent database bloat / DoS via giant strings
+    private const MAX_LABEL  = 100;
+    private const MAX_NAME   = 150;
+    private const MAX_FOCUS  = 200;
+    private const MAX_NOTE   = 500;
+    private const MAX_SECT   = 100;
+    private const MAX_PROG   = 300;
+
     public function __construct(
         private readonly DefaultPlanSeeder      $seeder,
         private readonly EntityManagerInterface $em,
@@ -43,12 +51,15 @@ class PlanController extends AbstractController
         $plan = $this->seeder->seedIfNeeded($this->getUser());
         $data = json_decode($request->getContent(), true) ?? [];
 
-        if (empty($data['label'])) {
+        $label = mb_substr(trim($data['label'] ?? ''), 0, self::MAX_LABEL);
+        if ($label === '') {
             return $this->json(['error' => 'Bezeichnung erforderlich'], 422);
         }
 
         $type = preg_replace('/[^a-z0-9_]/', '', strtolower($data['type'] ?? 'custom'));
         if ($type === '') $type = 'custom';
+
+        $color = $this->sanitizeColor($data['color'] ?? null);
 
         $maxSort = 0;
         foreach ($plan->getDays() as $d) {
@@ -57,9 +68,9 @@ class PlanController extends AbstractController
 
         $day = new PlanDay();
         $day->setType($type);
-        $day->setLabel($data['label']);
-        $day->setColor($data['color'] ?? '#888888');
-        $day->setFocus($data['focus'] ?? null);
+        $day->setLabel($label);
+        $day->setColor($color);
+        $day->setFocus(mb_substr(trim($data['focus'] ?? ''), 0, self::MAX_FOCUS) ?: null);
         $day->setSortOrder($maxSort + 1);
         $plan->addDay($day);
 
@@ -95,10 +106,10 @@ class PlanController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true) ?? [];
-        if (isset($data['label'])) $day->setLabel($data['label']);
-        if (isset($data['focus'])) $day->setFocus($data['focus']);
-        if (isset($data['color'])) $day->setColor($data['color']);
-        if (isset($data['note']))  $day->setNote($data['note'] ?: null);
+        if (isset($data['label'])) $day->setLabel(mb_substr(trim($data['label']), 0, self::MAX_LABEL));
+        if (isset($data['focus'])) $day->setFocus(mb_substr(trim($data['focus']), 0, self::MAX_FOCUS) ?: null);
+        if (isset($data['color'])) $day->setColor($this->sanitizeColor($data['color']));
+        if (isset($data['note']))  $day->setNote(mb_substr(trim($data['note']), 0, self::MAX_NOTE) ?: null);
 
         $this->em->flush();
         return $this->json(['success' => true]);
@@ -115,7 +126,8 @@ class PlanController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true) ?? [];
-        if (empty($data['name'])) {
+        $name = mb_substr(trim($data['name'] ?? ''), 0, self::MAX_NAME);
+        if ($name === '') {
             return $this->json(['error' => 'Name erforderlich'], 422);
         }
 
@@ -125,11 +137,12 @@ class PlanController extends AbstractController
         }
 
         $ex = new PlanExercise();
-        $ex->setName(trim($data['name']));
-        $ex->setSection($data['section'] ?? 'Hauptteil');
-        $ex->setDefaultSets((int) ($data['defaultSets'] ?? 3));
-        $ex->setDefaultReps(isset($data['defaultReps']) && $data['defaultReps'] !== '' ? (int) $data['defaultReps'] : null);
-        $ex->setProgressionNote($data['progressionNote'] ?? null ?: null);
+        $ex->setName($name);
+        $ex->setSection(mb_substr(trim($data['section'] ?? 'Hauptteil'), 0, self::MAX_SECT));
+        $ex->setDefaultSets(max(1, min(20, (int) ($data['defaultSets'] ?? 3))));
+        $ex->setDefaultReps(isset($data['defaultReps']) && $data['defaultReps'] !== ''
+            ? max(1, min(999, (int) $data['defaultReps'])) : null);
+        $ex->setProgressionNote(mb_substr(trim($data['progressionNote'] ?? ''), 0, self::MAX_PROG) ?: null);
         $ex->setIsNew(!empty($data['isNew']));
         $ex->setSortOrder($maxSort + 1);
         $day->addExercise($ex);
@@ -149,14 +162,15 @@ class PlanController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true) ?? [];
-        if (isset($data['name']))            $ex->setName(trim($data['name']));
-        if (isset($data['section']))         $ex->setSection($data['section']);
-        if (isset($data['defaultSets']))     $ex->setDefaultSets((int) $data['defaultSets']);
+        if (isset($data['name']))        $ex->setName(mb_substr(trim($data['name']), 0, self::MAX_NAME));
+        if (isset($data['section']))     $ex->setSection(mb_substr(trim($data['section']), 0, self::MAX_SECT));
+        if (isset($data['defaultSets'])) $ex->setDefaultSets(max(1, min(20, (int) $data['defaultSets'])));
         if (array_key_exists('defaultReps', $data))
-            $ex->setDefaultReps($data['defaultReps'] !== '' && $data['defaultReps'] !== null ? (int) $data['defaultReps'] : null);
+            $ex->setDefaultReps($data['defaultReps'] !== '' && $data['defaultReps'] !== null
+                ? max(1, min(999, (int) $data['defaultReps'])) : null);
         if (array_key_exists('progressionNote', $data))
-            $ex->setProgressionNote($data['progressionNote'] ?: null);
-        if (isset($data['isNew']))           $ex->setIsNew((bool) $data['isNew']);
+            $ex->setProgressionNote(mb_substr(trim($data['progressionNote'] ?? ''), 0, self::MAX_PROG) ?: null);
+        if (isset($data['isNew']))       $ex->setIsNew((bool) $data['isNew']);
 
         $this->em->flush();
         return $this->json($ex->toArray());
@@ -187,7 +201,7 @@ class PlanController extends AbstractController
         $siblings  = $ex->getDay()->getExercises()->toArray();
         usort($siblings, fn($a, $b) => $a->getSortOrder() <=> $b->getSortOrder());
 
-        $idx = array_search($ex, $siblings, true);
+        $idx     = array_search($ex, $siblings, true);
         $swapIdx = $direction === 'up' ? $idx - 1 : $idx + 1;
 
         if ($swapIdx >= 0 && $swapIdx < count($siblings)) {
@@ -199,5 +213,13 @@ class PlanController extends AbstractController
 
         $this->em->flush();
         return $this->json(['success' => true]);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private function sanitizeColor(?string $raw): string
+    {
+        $raw = trim($raw ?? '');
+        return preg_match('/^#[0-9A-Fa-f]{6}$/', $raw) ? strtoupper($raw) : '#888888';
     }
 }
