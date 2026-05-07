@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ApiAuthController extends AbstractController
@@ -20,7 +20,7 @@ class ApiAuthController extends AbstractController
         UserRepository              $users,
         UserPasswordHasherInterface $hasher,
         EntityManagerInterface      $em,
-        RateLimiterFactory          $apiLoginLimiter
+        RateLimiterFactoryInterface $apiLoginLimiter
     ): JsonResponse {
         // 5 attempts per IP per 15 minutes
         $limiter = $apiLoginLimiter->create($request->getClientIp());
