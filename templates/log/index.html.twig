@@ -227,6 +227,30 @@
   border-radius: 4px;
   transition: width 0.3s;
 }
+
+/* ── RPE tooltip ── */
+.rpe-header { position: relative; cursor: default; }
+.rpe-info-icon { color: var(--accent); font-size: 10px; vertical-align: middle; }
+.rpe-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1c1c;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+  width: 210px;
+  z-index: 200;
+  font-size: 11px;
+  color: #999;
+  text-align: left;
+  line-height: 1.7;
+  pointer-events: none;
+}
+.rpe-tooltip strong { color: #ddd; display: block; margin-bottom: 4px; }
+.rpe-header:hover .rpe-tooltip { display: block; }
 </style>
 {% endblock %}
 
@@ -270,7 +294,18 @@
             <div class="col-header"></div>
             <div class="col-header">Wdh</div>
             <div class="col-header">kg</div>
-            <div class="col-header">RPE</div>
+            <div class="col-header rpe-header">
+              RPE <span class="rpe-info-icon">ⓘ</span>
+              <div class="rpe-tooltip">
+                <strong>RPE — Anstrengungsempfinden</strong><br>
+                Wie viele Wdh hättest du noch geschafft?<br><br>
+                <span style="color:#4CAF7D">6</span> → 4+ Wdh Reserve<br>
+                <span style="color:#4CAF7D">7</span> → 3 Wdh Reserve<br>
+                <span style="color:#E0A03E">8</span> → 2 Wdh Reserve<br>
+                <span style="color:#E0A03E">9</span> → 1 Wdh Reserve<br>
+                <span style="color:#C9184A">10</span> → Muskelversagen
+              </div>
+            </div>
             <div></div>
           </div>
           <div class="set-rows" id="rows-{{ loop.index0 }}">
@@ -331,7 +366,7 @@ fetch('/api/last-weights/{{ type }}')
     prevWeights = data;
     document.querySelectorAll('.exercise-card').forEach((card, idx) => {
       const name = card.dataset.name;
-      const hint = document.getElementById('prev-' + (idx + 1));
+      const hint = document.getElementById('prev-' + idx);
       if (hint && data[name]) {
         const span = document.createElement('span');
         span.textContent = `${data[name].weight} kg × ${data[name].reps} Wdh (${data[name].date})`;
@@ -353,7 +388,7 @@ fetch('/api/last-weights/{{ type }}')
 
 function toggleSets(header) {
   const card = header.closest('.exercise-card');
-  const idx = [...document.querySelectorAll('.exercise-card')].indexOf(card) + 1;
+  const idx = [...document.querySelectorAll('.exercise-card')].indexOf(card);
   const container = document.getElementById('sets-' + idx);
   const chevron   = document.getElementById('chevron-' + idx);
   const isOpen    = container.classList.toggle('open');
@@ -410,7 +445,7 @@ function removeSet(btn) {
     r.querySelector('.set-label').textContent = i + 1;
   });
   const card = rows.closest('.exercise-card');
-  const idx = [...document.querySelectorAll('.exercise-card')].indexOf(card) + 1;
+  const idx = [...document.querySelectorAll('.exercise-card')].indexOf(card);
   updateSummary(idx);
 }
 
