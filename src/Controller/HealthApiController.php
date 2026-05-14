@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\HealthData;
-use App\Repository\HealthDataRepository;
+use App\Entity\HealthMetric;
+use App\Repository\HealthMetricRepository;
 use App\Repository\WorkoutSessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,10 +13,21 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class HealthApiController extends AbstractController
 {
+    /**
+     * Upsert one or more health metrics for a given date.
+     *
+     * New format (recommended — works for any future Health Connect data type):
+     *   POST /api/health/sync
+     *   { "date": "2026-05-09", "metrics": { "steps": 8432, "weight_kg": 78.5, ... } }
+     *
+     * Legacy flat format still accepted (camelCase auto-mapped to snake_case):
+     *   { "date": "...", "steps": 8432, "sleepMinutes": 427, "activeMinutes": 45,
+     *     "weightKg": 78.5, "caloriesKcal": 2150 }
+     */
     #[Route('/api/health/sync', name: 'api_health_sync', methods: ['POST'])]
     public function sync(
         Request                $request,
-        HealthDataRepository   $repo,
+        HealthMetricRepository $repo,
         EntityManagerInterface $em
     ): JsonResponse {
         $user = $this->getUser();
@@ -29,34 +40,77 @@ class HealthApiController extends AbstractController
             return $this->json(['error' => 'Invalid date'], 400);
         }
 
-        $record = $repo->findByUserAndDate($user, $date) ?? (new HealthData())->setUser($user)->setDate($date);
+        // Collect metrics: prefer new "metrics" object, fall back to legacy flat keys
+        $metrics = [];
+        if (isset($data['metrics']) && is_array($data['metrics'])) {
+            $metrics = $data['metrics'];
+        } else {
+            // Legacy camelCase → snake_case mapping
+            $legacyMap = [
+                'steps'         => 'steps',
+                'sleepMinutes'  => 'sleep_minutes',
+                'activeMinutes' => 'active_minutes',
+                'weightKg'      => 'weight_kg',
+                'caloriesKcal'  => 'calories_kcal',
+            ];
+            foreach ($legacyMap as $camel => $snake) {
+                if (array_key_exists($camel, $data) && $data[$camel] !== null) {
+                    $metrics[$snake] = $data[$camel];
+                }
+            }
+        }
 
-        if (array_key_exists('steps', $data))
-            $record->setSteps($data['steps'] !== null ? max(0, min(200_000, (int) $data['steps'])) : null);
-        if (array_key_exists('sleepMinutes', $data))
-            $record->setSleepMinutes($data['sleepMinutes'] !== null ? max(0, min(1440, (int) $data['sleepMinutes'])) : null);
-        if (array_key_exists('activeMinutes', $data))
-            $record->setActiveMinutes($data['activeMinutes'] !== null ? max(0, min(1440, (int) $data['activeMinutes'])) : null);
-        if (array_key_exists('weightKg', $data))
-            $record->setWeightKg($data['weightKg'] !== null ? max(20.0, min(300.0, (float) $data['weightKg'])) : null);
-        if (array_key_exists('caloriesKcal', $data))
-            $record->setCaloriesKcal($data['caloriesKcal'] !== null ? max(0, min(10_000, (int) $data['caloriesKcal'])) : null);
+        if (empty($metrics)) {
+            return $this->json(['error' => 'No metrics provided'], 400);
+        }
 
-        $em->persist($record);
+        $saved = [];
+        foreach ($metrics as $rawKey => $rawValue) {
+            // Normalise key: lowercase, only a-z 0-9 underscore, max 100 chars
+            $key = substr(preg_replace('/[^a-z0-9_]/', '_', strtolower((string) $rawKey)), 0, 100);
+            if ($key === '' || !is_numeric($rawValue)) {
+                continue;
+            }
+            $value = (float) $rawValue;
+
+            $record = $repo->findOneByUserDateKey($user, $date, $key)
+                ?? (new HealthMetric())->setUser($user)->setDate($date)->setMetricKey($key);
+            $record->setMetricValue($value);
+            $em->persist($record);
+            $saved[] = $key;
+        }
+
         $em->flush();
 
-        return $this->json(['success' => true]);
+        return $this->json(['success' => true, 'saved' => $saved]);
     }
 
+    /**
+     * Return health history grouped by date.
+     *
+     * GET /api/health/data?days=30
+     * Response: [ { "date": "2026-05-09", "steps": 8432, "weight_kg": 78.5 }, ... ]
+     */
     #[Route('/api/health/data', name: 'api_health_data', methods: ['GET'])]
-    public function data(Request $request, HealthDataRepository $repo): JsonResponse
+    public function data(Request $request, HealthMetricRepository $repo): JsonResponse
     {
-        $days    = min((int) $request->query->get('days', 7), 90);
-        $records = $repo->findRecentForUser($this->getUser(), $days);
-
-        return $this->json(array_map(fn($r) => $r->toArray(), $records));
+        $days = min((int) $request->query->get('days', 7), 90);
+        return $this->json($repo->findRecentGroupedForUser($this->getUser(), $days));
     }
 
+    /**
+     * Return all distinct metric keys the user has ever synced.
+     *
+     * GET /api/health/metrics
+     * Response: ["active_minutes", "calories_kcal", "steps", "weight_kg", ...]
+     */
+    #[Route('/api/health/metrics', name: 'api_health_metrics', methods: ['GET'])]
+    public function metrics(HealthMetricRepository $repo): JsonResponse
+    {
+        return $this->json($repo->findAllMetricKeysForUser($this->getUser()));
+    }
+
+    /** Recent workout sessions for the Android dashboard */
     #[Route('/api/health/workouts', name: 'api_health_workouts', methods: ['GET'])]
     public function workouts(Request $request, WorkoutSessionRepository $repo): JsonResponse
     {

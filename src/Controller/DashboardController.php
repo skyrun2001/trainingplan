@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\HealthData;
+use App\Entity\HealthMetric;
 use App\Repository\ExerciseLogRepository;
-use App\Repository\HealthDataRepository;
+use App\Repository\HealthMetricRepository;
 use App\Repository\WorkoutSessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,11 +17,18 @@ class DashboardController extends AbstractController
 {
     private const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+    // Default display config when the user has no saved preference yet
+    private const DEFAULT_HEALTH_DASHBOARD = [
+        'cards'        => [],   // filled dynamically from available metric keys
+        'chartMetrics' => [],   // filled dynamically
+        'chartDays'    => 30,
+    ];
+
     #[Route('/dashboard', name: 'app_dashboard')]
     public function index(
         WorkoutSessionRepository $sessionRepo,
         ExerciseLogRepository    $exerciseRepo,
-        HealthDataRepository     $healthRepo
+        HealthMetricRepository   $healthRepo
     ): Response {
         $user           = $this->getUser();
         $recentSessions = $sessionRepo->findRecentForUser($user, 30);
@@ -39,8 +46,16 @@ class DashboardController extends AbstractController
         );
         $weeklyData = $this->buildWeeklyData($last4Weeks);
 
-        $healthHistory   = $healthRepo->findRecentForUser($user, 30);
-        $healthChartData = array_map(fn($h) => $h->toArray(), array_reverse($healthHistory));
+        // Health: generic key-value metrics
+        $settings        = $user->getSettings();
+        $healthDashboard = $this->resolveHealthDashboard(
+            $settings['healthDashboard'] ?? null,
+            $healthRepo->findAllMetricKeysForUser($user)
+        );
+        $chartDays       = $healthDashboard['chartDays'];
+        $healthHistory   = $healthRepo->findRecentGroupedForUser($user, $chartDays);
+        $todayMetrics    = $healthRepo->findTodayForUser($user);
+        $availableKeys   = $healthRepo->findAllMetricKeysForUser($user);
 
         return $this->render('dashboard/index.html.twig', [
             'sessions'         => $recentSessions,
@@ -53,17 +68,19 @@ class DashboardController extends AbstractController
             'weekDays'         => $this->buildCurrentWeek($sessionRepo),
             'schedule'         => $user->getWeekSchedule(),
             'reminderTime'     => $user->getReminderTime(),
-            'todayHealth'      => $healthRepo->findByUserAndDate($user, new \DateTime('today')),
-            'healthHistory'    => $healthHistory,
-            // Pre-encoded with JSON_HEX_TAG so </script> in any string field cannot escape the tag
-            'healthChartJson'  => json_encode($healthChartData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR),
+            // Health
+            'todayMetrics'     => $todayMetrics,
+            'availableKeys'    => $availableKeys,
+            'healthDashboard'  => $healthDashboard,
+            'healthChartJson'  => json_encode($healthHistory, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR),
         ]);
     }
 
+    /** Manual health entry from the web (no app required) */
     #[Route('/health/save', name: 'health_save', methods: ['POST'])]
     public function saveHealth(
         Request                $request,
-        HealthDataRepository   $repo,
+        HealthMetricRepository $repo,
         EntityManagerInterface $em
     ): JsonResponse {
         $user = $this->getUser();
@@ -75,25 +92,29 @@ class DashboardController extends AbstractController
         } catch (\Exception) {
             return $this->json(['error' => 'Ungültiges Datum'], 400);
         }
-
         if ($date > new \DateTime('today')) {
             return $this->json(['error' => 'Kein Datum in der Zukunft'], 400);
         }
 
-        $record = $repo->findByUserAndDate($user, $date)
-            ?? (new HealthData())->setUser($user)->setDate($date);
+        $metrics = $data['metrics'] ?? [];
+        if (!is_array($metrics) || empty($metrics)) {
+            return $this->json(['error' => 'Keine Metriken angegeben'], 400);
+        }
 
-        if (isset($data['weightKg']) && $data['weightKg'] !== '')
-            $record->setWeightKg(max(20.0, min(300.0, (float) $data['weightKg'])));
-        if (isset($data['caloriesKcal']) && $data['caloriesKcal'] !== '')
-            $record->setCaloriesKcal(max(0, min(10_000, (int) $data['caloriesKcal'])));
-        if (isset($data['steps']) && $data['steps'] !== '')
-            $record->setSteps(max(0, min(200_000, (int) $data['steps'])));
+        $saved = [];
+        foreach ($metrics as $rawKey => $rawValue) {
+            $key = substr(preg_replace('/[^a-z0-9_]/', '_', strtolower((string) $rawKey)), 0, 100);
+            if ($key === '' || !is_numeric($rawValue)) continue;
 
-        $em->persist($record);
+            $record = $repo->findOneByUserDateKey($user, $date, $key)
+                ?? (new HealthMetric())->setUser($user)->setDate($date)->setMetricKey($key);
+            $record->setMetricValue((float) $rawValue);
+            $em->persist($record);
+            $saved[$key] = (float) $rawValue;
+        }
         $em->flush();
 
-        return $this->json(['success' => true, 'data' => $record->toArray()]);
+        return $this->json(['success' => true, 'saved' => $saved]);
     }
 
     #[Route('/api/settings', name: 'api_settings', methods: ['PATCH'])]
@@ -116,6 +137,29 @@ class DashboardController extends AbstractController
         if (array_key_exists('reminderTime', $data)) {
             $t = $data['reminderTime'] ?? '';
             $current['reminderTime'] = preg_match('/^\d{2}:\d{2}$/', $t) ? $t : null;
+        }
+
+        if (isset($data['healthDashboard']) && is_array($data['healthDashboard'])) {
+            $hd = $data['healthDashboard'];
+            $validKey = static fn($k) => (bool) preg_match('/^[a-z0-9_]{1,100}$/', (string) $k);
+
+            $hdConfig = $current['healthDashboard'] ?? [];
+
+            if (isset($hd['cards']) && is_array($hd['cards'])) {
+                $hdConfig['cards'] = array_values(array_slice(array_filter(
+                    array_map(fn($c) => isset($c['metric']) && $validKey($c['metric'])
+                        ? ['metric' => $c['metric']] : null,
+                        $hd['cards']
+                    )
+                ), 0, 20));
+            }
+            if (isset($hd['chartMetrics']) && is_array($hd['chartMetrics'])) {
+                $hdConfig['chartMetrics'] = array_values(array_filter($hd['chartMetrics'], $validKey));
+            }
+            if (isset($hd['chartDays'])) {
+                $hdConfig['chartDays'] = max(7, min(90, (int) $hd['chartDays']));
+            }
+            $current['healthDashboard'] = $hdConfig;
         }
 
         $user->setSettings($current);
@@ -154,6 +198,45 @@ class DashboardController extends AbstractController
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Resolves the effective health dashboard config.
+     * If the user has no saved config, auto-generates defaults from available keys.
+     */
+    private function resolveHealthDashboard(?array $saved, array $availableKeys): array
+    {
+        // Known metrics with smart defaults (icon, color for display in PHP context is unused;
+        // it's handled entirely in JS, but we need to know the preferred card/chart set)
+        $preferredCards  = ['steps','sleep_minutes','active_minutes','weight_kg','calories_kcal',
+                            'heart_rate_avg','heart_rate_resting','distance_meters','vo2_max'];
+        $preferredCharts = ['steps','weight_kg','calories_kcal'];
+
+        if ($saved !== null && isset($saved['cards'])) {
+            return array_merge(self::DEFAULT_HEALTH_DASHBOARD, $saved);
+        }
+
+        // First visit: auto-select cards from available keys (up to 6), prefer known order
+        $autoCards = [];
+        foreach ($preferredCards as $k) {
+            if (in_array($k, $availableKeys, true)) {
+                $autoCards[] = ['metric' => $k];
+            }
+        }
+        // Add any remaining unknown keys
+        foreach ($availableKeys as $k) {
+            if (!in_array($k, array_column($autoCards, 'metric'), true)) {
+                $autoCards[] = ['metric' => $k];
+            }
+        }
+
+        $autoCharts = array_values(array_intersect($preferredCharts, $availableKeys));
+
+        return [
+            'cards'        => array_slice($autoCards, 0, 6),
+            'chartMetrics' => array_slice($autoCharts, 0, 3),
+            'chartDays'    => 30,
+        ];
+    }
 
     private function buildCurrentWeek(WorkoutSessionRepository $repo): array
     {
