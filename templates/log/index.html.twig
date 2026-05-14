@@ -443,8 +443,12 @@ function addSet(idx) {
   rpeIn.className = 'set-input rpe-input';
   rpeIn.dataset.set = setNum;
   rpeIn.setAttribute('onchange', 'onRpeChange(this)');
-  [['', '—'], ['6','6 · easy'], ['7','7 · moderat'], ['8','8 · schwer'], ['9','9 · sehr schwer'], ['10','10 · max']]
-    .forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; rpeIn.appendChild(o); });
+  [['',''], ['6','6'], ['7','7'], ['8','8'], ['9','9'], ['10','10']]
+    .forEach(([v, t]) => {
+      const o = document.createElement('option');
+      const labels = {'':'--','6':'6 - easy','7':'7 - moderat','8':'8 - schwer','9':'9 - sehr schwer','10':'10 - max'};
+      o.value = v; o.textContent = labels[v] ?? t; rpeIn.appendChild(o);
+    });
 
   const removeBtn = document.createElement('button');
   removeBtn.className = 'remove-set';
