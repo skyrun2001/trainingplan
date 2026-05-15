@@ -83,5 +83,9 @@
             "allow-contrib": false,
             "require": "8.0.*"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "symfony/test-pack": "*"
     }
 }
