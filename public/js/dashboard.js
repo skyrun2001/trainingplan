@@ -111,12 +111,12 @@ function loadChart(name) {
           labels: data.map(d => d.date),
           datasets: [
             {
-              label: 'Max. Gewicht (kg)', data: data.map(d => d.maxWeight),
+              label: (window.PAGE.metricLabels?.chart_weight ?? 'Max Weight (kg)'), data: data.map(d => d.maxWeight),
               borderColor: '#C9184A', backgroundColor: 'rgba(201,24,74,0.08)',
               fill: true, tension: 0.3, pointBackgroundColor: '#C9184A', pointRadius: 4, yAxisID: 'yWeight',
             },
             {
-              label: 'Max. Wiederholungen', data: data.map(d => d.maxReps),
+              label: (window.PAGE.metricLabels?.chart_reps ?? 'Max Reps'), data: data.map(d => d.maxReps),
               borderColor: '#4361EE', fill: false, tension: 0.3,
               pointBackgroundColor: '#4361EE', pointRadius: 4, yAxisID: 'yReps', borderDash: [4, 3],
             },
@@ -154,16 +154,17 @@ function hexToRgba(hex, a) {
   return `rgba(${r},${g},${b},${a})`;
 }
 
+const ML = window.PAGE.metricLabels ?? {};
 const METRIC_DEFS = {
-  steps:              { icon: '👣', color: '#6DB6FF', label: 'Schritte',   fmt: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v)), chartType: 'bar'  },
-  sleep_minutes:      { icon: '💤', color: '#9C84F7', label: 'Schlaf',     fmt: v => `${Math.floor(v / 60)}h ${Math.round(v % 60)}m`,                chartType: 'bar'  },
-  active_minutes:     { icon: '🏃', color: '#22c55e', label: 'Aktiv Min',  fmt: v => Math.round(v) + 'min',                                          chartType: 'bar'  },
-  weight_kg:          { icon: '⚖️', color: '#E0A03E', label: 'Gewicht',    fmt: v => v.toFixed(1) + ' kg',                                           chartType: 'line' },
-  calories_kcal:      { icon: '🔥', color: '#FF8C42', label: 'Kalorien',   fmt: v => Math.round(v) + ' kcal',                                        chartType: 'bar'  },
-  heart_rate_avg:     { icon: '❤️', color: '#ef4444', label: 'Herzrate',   fmt: v => Math.round(v) + ' bpm',                                         chartType: 'line' },
-  heart_rate_resting: { icon: '💗', color: '#f87171', label: 'Ruhepuls',   fmt: v => Math.round(v) + ' bpm',                                         chartType: 'line' },
-  distance_meters:    { icon: '📍', color: '#60a5fa', label: 'Distanz',    fmt: v => v >= 1000 ? (v / 1000).toFixed(2) + ' km' : Math.round(v) + ' m', chartType: 'bar' },
-  vo2_max:            { icon: '💨', color: '#a78bfa', label: 'VO2 Max',    fmt: v => v.toFixed(1),                                                   chartType: 'line' },
+  steps:              { icon: '👣', color: '#6DB6FF', label: ML.steps              ?? 'Steps',        fmt: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v)), chartType: 'bar'  },
+  sleep_minutes:      { icon: '💤', color: '#9C84F7', label: ML.sleep_minutes      ?? 'Sleep',        fmt: v => `${Math.floor(v / 60)}h ${Math.round(v % 60)}m`,                chartType: 'bar'  },
+  active_minutes:     { icon: '🏃', color: '#22c55e', label: ML.active_minutes     ?? 'Active Min',   fmt: v => Math.round(v) + 'min',                                          chartType: 'bar'  },
+  weight_kg:          { icon: '⚖️', color: '#E0A03E', label: ML.weight_kg          ?? 'Weight',       fmt: v => v.toFixed(1) + ' kg',                                           chartType: 'line' },
+  calories_kcal:      { icon: '🔥', color: '#FF8C42', label: ML.calories_kcal      ?? 'Calories',     fmt: v => Math.round(v) + ' kcal',                                        chartType: 'bar'  },
+  heart_rate_avg:     { icon: '❤️', color: '#ef4444', label: ML.heart_rate_avg     ?? 'Heart Rate',   fmt: v => Math.round(v) + ' bpm',                                         chartType: 'line' },
+  heart_rate_resting: { icon: '💗', color: '#f87171', label: ML.heart_rate_resting ?? 'Resting HR',   fmt: v => Math.round(v) + ' bpm',                                         chartType: 'line' },
+  distance_meters:    { icon: '📍', color: '#60a5fa', label: ML.distance_meters    ?? 'Distance',     fmt: v => v >= 1000 ? (v / 1000).toFixed(2) + ' km' : Math.round(v) + ' m', chartType: 'bar' },
+  vo2_max:            { icon: '💨', color: '#a78bfa', label: ML.vo2_max            ?? 'VO2 Max',      fmt: v => v.toFixed(1),                                                   chartType: 'line' },
 };
 
 function metaDef(key) {

@@ -36,10 +36,12 @@ overall:
     active_time:     Aktive Minuten
     weight:          Gewicht
     calories:        Kalorien
-    heart_rate_avg:  Durchschnittliche Herzfrequenz
-    pulse:           Puls
+    heart_rate_avg:  Ø Herzfrequenz
+    pulse:           Ruhepuls
     distance:        Distanz
     vo2_max:         VO2 Max
+    chart_weight:    Max. Gewicht (kg)
+    chart_reps:      Max. Wdh.
 
 button:
     allow:      Erlauben

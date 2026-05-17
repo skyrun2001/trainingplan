@@ -36,10 +36,12 @@ overall:
     active_time:     Active Minutes
     weight:          Weight
     calories:        Calories
-    heart_rate_avg:  Average Heart Rate
-    pulse:           Heart Rate
+    heart_rate_avg:  Avg Heart Rate
+    pulse:           Resting HR
     distance:        Distance
     vo2_max:         VO2 Max
+    chart_weight:    Max Weight (kg)
+    chart_reps:      Max Reps
 
 button:
     allow:      Allow
