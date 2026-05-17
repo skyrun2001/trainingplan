@@ -9,22 +9,22 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^3.2",
+        "doctrine/doctrine-bundle": "^3.2.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
-        "doctrine/orm": "^3.6",
-        "symfony/asset": "^8.0",
+        "doctrine/orm": "^3.6.5",
+        "symfony/asset": "^8.0.8",
         "symfony/console": "8.0.*",
         "symfony/dotenv": "8.0.*",
-        "symfony/flex": "^2",
-        "symfony/form": "^8.0",
+        "symfony/flex": "^2.10",
+        "symfony/form": "^8.0.9",
         "symfony/framework-bundle": "8.0.*",
-        "symfony/property-access": "^8.0",
-        "symfony/rate-limiter": "*",
+        "symfony/property-access": "^8.0.8",
+        "symfony/rate-limiter": ">=8.0.10",
         "symfony/runtime": "8.0.*",
         "symfony/security-bundle": "8.0.*",
-        "symfony/serializer": "^8.0",
-        "symfony/twig-bundle": "^8.0",
-        "symfony/validator": "^8.0",
+        "symfony/serializer": "^8.0.10",
+        "symfony/twig-bundle": "^8.0.8",
+        "symfony/validator": "^8.0.10",
         "symfony/yaml": "8.0.*"
     },
     "config": {
@@ -85,8 +85,9 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
-        "symfony/test-pack": "*",
+        "phpunit/phpunit": ">=13.1.10",
+        "symfony/browser-kit": "8.0.*",
+        "symfony/css-selector": "8.0.*",
         "symfony/maker-bundle": "^1.67"
     }
 }
