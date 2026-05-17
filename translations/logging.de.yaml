@@ -1,0 +1,21 @@
+logging:
+    last_session : "Letzte Session: "
+    loading: "wird geladen ..."
+    rpe_headline: "RPE — Anstrengungsempfinden"
+    rpe_subtitle: "Wie viele Wdh hättest du noch geschafft?"
+    rpe_explanation:
+        four_plus: "→ 4+ Wdh Reserve"
+        three: "→ 3 Wdh Reserve"
+        two: "→ 2 Wdh Reserve"
+        one: "→ 1 Wdh Reserve"
+        zero: "→ Muskelversagen"
+    rpe_options:
+        easy: "6 · leicht"
+        moderate: "7 moderat"
+        two: "8 schwer"
+        extrem_heavy: "9 sehr schwer"
+        max: "10 max"
+    detail: "Details"
+    notes: "Notizen (optional)"
+    notes_description : "Wie war das Training? Besonderheiten?"
+

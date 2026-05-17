@@ -1,0 +1,20 @@
+logging:
+    last_session: "Last session: "
+    loading: "loading ..."
+    rpe_headline: "RPE — Rate of Perceived Exertion"
+    rpe_subtitle: "How many reps could you still have done?"
+    rpe_explanation:
+        four_plus: "→ 4+ reps in reserve"
+        three: "→ 3 reps in reserve"
+        two: "→ 2 reps in reserve"
+        one: "→ 1 rep in reserve"
+        zero: "→ Muscle failure"
+    rpe_options:
+        easy: "6 · light"
+        moderate: "7 moderate"
+        two: "8 hard"
+        extrem_heavy: "9 very hard"
+        max: "10 max"
+    detail: "Details"
+    notes: "Notes (optional)"
+    notes_description: "How was the training? Any special notes?"
