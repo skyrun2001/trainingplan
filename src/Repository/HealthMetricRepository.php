@@ -22,10 +22,18 @@ class HealthMetricRepository extends ServiceEntityRepository
     /** Returns flat map: ['steps' => 8432, 'weight_kg' => 78.5, ...] for today */
     public function findTodayForUser(User $user): array
     {
-        $records = $this->findBy(['user' => $user, 'date' => new \DateTime('today')]);
-        $result  = [];
-        foreach ($records as $r) {
-            $result[$r->getMetricKey()] = $r->getMetricValue();
+        $rows = $this->createQueryBuilder('h')
+            ->select('h.metricKey, h.metricValue')
+            ->where('h.user = :user')
+            ->andWhere('h.date = :today')
+            ->setParameter('user', $user)
+            ->setParameter('today', new \DateTime('today'))
+            ->getQuery()
+            ->getArrayResult();
+
+        $result = [];
+        foreach ($rows as $r) {
+            $result[$r['metricKey']] = $r['metricValue'];
         }
         return $result;
     }
@@ -36,7 +44,8 @@ class HealthMetricRepository extends ServiceEntityRepository
      */
     public function findRecentGroupedForUser(User $user, int $days): array
     {
-        $records = $this->createQueryBuilder('h')
+        $rows = $this->createQueryBuilder('h')
+            ->select('h.date, h.metricKey, h.metricValue')
             ->where('h.user = :user')
             ->andWhere('h.date >= :start')
             ->setParameter('user', $user)
@@ -44,15 +53,15 @@ class HealthMetricRepository extends ServiceEntityRepository
             ->orderBy('h.date', 'ASC')
             ->addOrderBy('h.metricKey', 'ASC')
             ->getQuery()
-            ->getResult();
+            ->getArrayResult();
 
         $grouped = [];
-        foreach ($records as $r) {
-            $date = $r->getDate()->format('Y-m-d');
+        foreach ($rows as $r) {
+            $date = $r['date']->format('Y-m-d');
             if (!isset($grouped[$date])) {
                 $grouped[$date] = ['date' => $date];
             }
-            $grouped[$date][$r->getMetricKey()] = $r->getMetricValue();
+            $grouped[$date][$r['metricKey']] = $r['metricValue'];
         }
         return array_values($grouped);
     }

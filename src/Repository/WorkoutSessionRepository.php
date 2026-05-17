@@ -17,6 +17,8 @@ class WorkoutSessionRepository extends ServiceEntityRepository
     public function findRecentForUser(User $user, int $limit = 20): array
     {
         return $this->createQueryBuilder('w')
+            ->leftJoin('w.exerciseLogs', 'e')
+            ->addSelect('e')
             ->where('w.user = :user')
             ->setParameter('user', $user)
             ->orderBy('w.date', 'DESC')
@@ -38,6 +40,23 @@ class WorkoutSessionRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** Fetches sessions of a given type within the last N days, with exercise logs eagerly loaded. */
+    public function findRecentByTypeForUser(User $user, string $type, int $days = 60): array
+    {
+        return $this->createQueryBuilder('w')
+            ->leftJoin('w.exerciseLogs', 'e')
+            ->addSelect('e')
+            ->where('w.user = :user')
+            ->andWhere('w.type = :type')
+            ->andWhere('w.date >= :since')
+            ->setParameter('user', $user)
+            ->setParameter('type', $type)
+            ->setParameter('since', new \DateTime("-{$days} days"))
+            ->orderBy('w.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByTypeForUser(User $user): array
     {
         return $this->createQueryBuilder('w')
@@ -51,10 +70,13 @@ class WorkoutSessionRepository extends ServiceEntityRepository
 
     public function getCurrentStreakForUser(User $user): int
     {
+        // Limit to last 366 days — no streak can exceed a calendar year
         $sessions = $this->createQueryBuilder('w')
             ->select('w.date')
             ->where('w.user = :user')
+            ->andWhere('w.date >= :since')
             ->setParameter('user', $user)
+            ->setParameter('since', new \DateTime('-366 days'))
             ->orderBy('w.date', 'DESC')
             ->getQuery()
             ->getArrayResult();

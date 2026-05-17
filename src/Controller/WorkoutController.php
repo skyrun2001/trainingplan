@@ -109,13 +109,8 @@ class WorkoutController extends AbstractController
     #[Route('/api/last-weights/{type}', name: 'api_last_weights')]
     public function lastWeights(string $type, WorkoutSessionRepository $repo): JsonResponse
     {
-        $sessions = $repo->findByDateRangeAndUser(
-            new \DateTime('-60 days'),
-            new \DateTime(),
-            $this->getUser()
-        );
-        $sessions = array_filter($sessions, fn($s) => $s->getType() === $type);
-        usort($sessions, fn($a, $b) => $b->getDate() <=> $a->getDate());
+        // Type-filtered, date-sorted, exercise logs eagerly loaded — no N+1, no PHP filtering
+        $sessions = $repo->findRecentByTypeForUser($this->getUser(), $type, 60);
 
         $weights = [];
         foreach ($sessions as $session) {
