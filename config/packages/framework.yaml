@@ -1,6 +1,8 @@
 framework:
     secret: '%env(APP_SECRET)%'
     default_locale: de
+    enabled_locales: [de, en]
+    set_locale_from_accept_language: true
     translator:
         default_path: '%kernel.project_dir%/translations'
         fallbacks: [de]

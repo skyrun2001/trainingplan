@@ -1,32 +1,71 @@
+nav:
+    plan:      Plan
+    log:       Log
+    dashboard: Dashboard
+    logout:    Log out
+
+auth:
+    login:
+        title:    Welcome back
+        subtitle: Sign in to continue
+        username: Username
+        password: Password
+        remember: Stay signed in (7 days)
+        submit:   Sign in
+    register:
+        title:    Create account
+        username: Username
+        password: Password
+        submit:   Create account
+        back:     Already registered?
+    registered: Account created — sign in now!
+
 diagrams:
     days:
-        seven_days: 6d
+        seven_days:    7d
         fourteen_days: 14d
-        thirty_days: 30d
-        sixty_days: 60d
-        ninety_days: 90d
+        thirty_days:   30d
+        sixty_days:    60d
+        ninety_days:   90d
+
 overall:
-    trainings: Trainings
-    training: Training
-    steps: Steps
-    sleep: Sleep
-    active_time: Active Minutes
-    weight: Weight
-    calories: Calories
-    heart_rate_avg: Average Heartrate
-    pulse: Heartrate
-    distance: Distance
-    vo2_max: VO2Max
+    trainings:       Trainings
+    training:        Training
+    steps:           Steps
+    sleep:           Sleep
+    active_time:     Active Minutes
+    weight:          Weight
+    calories:        Calories
+    heart_rate_avg:  Average Heart Rate
+    pulse:           Heart Rate
+    distance:        Distance
+    vo2_max:         VO2 Max
+
 button:
-    allow: Allow
-    edit: Edit
-    save: Save
+    allow:      Allow
+    edit:       Edit
+    save:       Save
     track_data: Track data
-    saved: Saved
+    saved:      Saved
 
 unit:
-    min: min
-    kg: lb
-    kcal: kcal
-    bpm: bpm
-    meter: ft
+    min:   min
+    kg:    kg
+    kcal:  kcal
+    bpm:   bpm
+    meter: m
+
+dashboard:
+    page_label:                  Training Plan
+    page_headline:               Dashboard
+    goal:                        "· Goal: Top Shape May 2027"
+    days_in_row:                 days in a row
+    empty_trainings_message:     No workouts logged yet
+    call_to_cation_first_training: Start your first workout now!
+    start_training:              Start workout
+    reminder:                    "\U0001F514 Reminder"
+    give_permission_to_remind:   Click to allow
+    reminder_sub_information:    "* Reminders require the browser to be open"
+    show_cards:                  Show cards
+    diagramms:                   Charts
+    time_span:                   Time range

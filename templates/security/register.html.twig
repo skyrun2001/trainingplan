@@ -74,7 +74,7 @@
 {% block body %}
 <div class="auth-wrap">
   <div class="auth-card">
-    <div class="auth-title">Account erstellen</div>
+    <div class="auth-title">{{ 'auth.register.title'|trans }}</div>
     <div class="auth-sub">Dein persönlicher Trainingsplan</div>
 
     {% if error %}
@@ -83,7 +83,7 @@
 
     <form method="post">
       <div class="field">
-        <label for="username">Benutzername</label>
+        <label for="username">{{ 'auth.register.username'|trans }}</label>
         <input type="text" id="username" name="username"
                value="{{ app.request.request.get('username') }}"
                autocomplete="username" autofocus required
@@ -91,7 +91,7 @@
         <div class="hint">Buchstaben, Zahlen, _ - . · mind. 3 Zeichen</div>
       </div>
       <div class="field">
-        <label for="password">Passwort</label>
+        <label for="password">{{ 'auth.register.password'|trans }}</label>
         <input type="password" id="password" name="password"
                autocomplete="new-password" required minlength="6">
         <div class="hint">Mind. 6 Zeichen</div>
@@ -101,11 +101,11 @@
         <input type="password" id="confirm" name="confirm"
                autocomplete="new-password" required>
       </div>
-      <button class="auth-btn" type="submit">Account erstellen</button>
+      <button class="auth-btn" type="submit">{{ 'auth.register.submit'|trans }}</button>
     </form>
 
     <div class="auth-footer">
-      Bereits registriert? <a href="{{ path('app_login') }}">Einloggen</a>
+      {{ 'auth.register.back'|trans }} <a href="{{ path('app_login') }}">{{ 'auth.login.submit'|trans }}</a>
     </div>
   </div>
 </div>

@@ -62,6 +62,11 @@ body {
 .nav-link:hover { color: var(--text); background: var(--surface2); }
 .nav-link.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
 
+.locale-switcher { display: flex; gap: 2px; margin-left: 6px; }
+.locale-btn { font-size: 18px; line-height: 1; padding: 4px; border-radius: 6px; text-decoration: none; opacity: 0.35; transition: opacity 0.15s; }
+.locale-btn:hover { opacity: 0.75; }
+.locale-btn.on { opacity: 1; }
+
 /* ═══════════════════════════════════════════════════════════════════════════
    LAYOUT
    ═══════════════════════════════════════════════════════════════════════════ */

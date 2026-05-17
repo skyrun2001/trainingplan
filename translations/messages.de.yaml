@@ -1,32 +1,71 @@
+nav:
+    plan:      Plan
+    log:       Loggen
+    dashboard: Dashboard
+    logout:    Abmelden
+
+auth:
+    login:
+        title:    Willkommen zurück
+        subtitle: Melde dich an um fortzufahren
+        username: Benutzername
+        password: Passwort
+        remember: Angemeldet bleiben (7 Tage)
+        submit:   Einloggen
+    register:
+        title:    Konto erstellen
+        username: Benutzername
+        password: Passwort
+        submit:   Konto erstellen
+        back:     Bereits registriert?
+    registered: Konto erstellt — jetzt einloggen!
+
 diagrams:
     days:
-        seven_days: 6T
+        seven_days:    7T
         fourteen_days: 14T
-        thirty_days: 30T
-        sixty_days: 60T
-        ninety_days: 90T
+        thirty_days:   30T
+        sixty_days:    60T
+        ninety_days:   90T
+
 overall:
-    trainings: Trainings
-    training: Trainig
-    steps: Schritte
-    sleep: Schlaf
-    active_time: Aktive Minuten
-    weight: Gewicht
-    calories: Kalorien
-    heart_rate_avg: Durschnittliche Herzfreuqenz
-    pulse: Puls
-    distance: Distanz
-    vo2_max: VO2 Max
+    trainings:       Trainings
+    training:        Training
+    steps:           Schritte
+    sleep:           Schlaf
+    active_time:     Aktive Minuten
+    weight:          Gewicht
+    calories:        Kalorien
+    heart_rate_avg:  Durchschnittliche Herzfrequenz
+    pulse:           Puls
+    distance:        Distanz
+    vo2_max:         VO2 Max
+
 button:
-    allow: Erlauben
-    edit: Bearbeiten
-    save: Speichern
+    allow:      Erlauben
+    edit:       Bearbeiten
+    save:       Speichern
     track_data: Daten erfassen
-    saved: Gespeichert
+    saved:      Gespeichert
 
 unit:
-    min: min
-    kg: kg
-    kcal: kcal
-    bpm: bpm
+    min:   min
+    kg:    kg
+    kcal:  kcal
+    bpm:   bpm
     meter: m
+
+dashboard:
+    page_label:                  Trainingsplan
+    page_headline:               Dashboard
+    goal:                        "· Ziel: Top Form Mai 2027"
+    days_in_row:                 Tage in Folge
+    empty_trainings_message:     Noch keine Trainings geloggt
+    call_to_cation_first_training: Starte jetzt dein erstes Training!
+    start_training:              Training starten
+    reminder:                    "\U0001F514 Erinnerung"
+    give_permission_to_remind:   Klicken zum Erlauben
+    reminder_sub_information:    "* Erinnerung nur bei geöffnetem Browser"
+    show_cards:                  Karten anzeigen
+    diagramms:                   Diagramme
+    time_span:                   Zeitraum
