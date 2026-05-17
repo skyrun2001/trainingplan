@@ -86,6 +86,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "*",
-        "symfony/test-pack": "*"
+        "symfony/test-pack": "*",
+        "symfony/maker-bundle": "^1.67"
     }
 }
