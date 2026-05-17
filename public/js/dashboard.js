@@ -342,19 +342,32 @@ async function saveHealthConfig() {
 }
 
 // ── Entry form ────────────────────────────────────────────────────────────────
+const METRIC_STEPS = {
+  steps: '1', sleep_minutes: '1', active_minutes: '1', calories_kcal: '1',
+  heart_rate_avg: '1', heart_rate_resting: '1', distance_meters: '1',
+  weight_kg: '0.1', vo2_max: '0.1',
+};
+const METRIC_UNITS = {
+  sleep_minutes: 'min', active_minutes: 'min', weight_kg: 'kg',
+  calories_kcal: 'kcal', heart_rate_avg: 'bpm', heart_rate_resting: 'bpm',
+  distance_meters: 'm',
+};
+
 function renderEntryForm() {
   const container = document.getElementById('healthEntryFields');
   container.innerHTML = '';
   const shown = [...new Set([...hdConfig.cards.map(c => c.metric), ...hdConfig.chartMetrics])];
   const keys  = shown.length ? shown : ['steps', 'weight_kg', 'calories_kcal', 'sleep_minutes', 'active_minutes'];
   keys.forEach(key => {
-    const d   = metaDef(key);
-    const cur = todayMetrics[key] ?? '';
-    const grp = document.createElement('div');
+    const d    = metaDef(key);
+    const cur  = todayMetrics[key] ?? '';
+    const step = METRIC_STEPS[key] ?? 'any';
+    const unit = METRIC_UNITS[key] ? ` <span style="color:var(--muted);font-size:9px">${METRIC_UNITS[key]}</span>` : '';
+    const grp  = document.createElement('div');
     grp.className = 'health-input-group';
-    grp.innerHTML = `<label>${d.icon} ${d.label}</label>
+    grp.innerHTML = `<label>${d.icon} ${d.label}${unit}</label>
 <input type="number" class="health-input health-entry-input" data-metric="${key}"
-       placeholder="--" value="${cur !== '' ? cur : ''}" step="any" min="0">`;
+       placeholder="--" value="${cur !== '' ? cur : ''}" step="${step}" min="0">`;
     container.appendChild(grp);
   });
 }
@@ -417,4 +430,4 @@ updateNotifBadge();
 scheduleReminderCheck();
 renderCards();
 renderCharts();
-renderEntryForm();
+// entry form fields are server-rendered; renderEntryForm() is called only after config changes
