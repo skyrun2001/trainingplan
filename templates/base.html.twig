@@ -20,10 +20,28 @@
     <a href="{{ path('app_dashboard') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">{{ 'nav.dashboard'|trans }}</a>
     <a href="{{ path('app_logout') }}"    class="nav-link" style="margin-left:4px;color:var(--muted)">↩</a>
   {% endif %}
-  <span class="locale-switcher">
-    <a href="{{ path('app_locale', {locale: 'de'}) }}" class="locale-btn{% if app.request.locale == 'de' %} on{% endif %}" title="Deutsch">🇩🇪</a>
-    <a href="{{ path('app_locale', {locale: 'en'}) }}" class="locale-btn{% if app.request.locale == 'en' %} on{% endif %}" title="English">🇬🇧</a>
-  </span>
+    <div class="locale-switcher" id="localeSwitcher">
+        <button class="locale-button" type="button" onclick="toggleLocaleMenu()">
+            {% if app.request.locale == 'de' %}
+                🇩🇪 DE
+            {% else %}
+                🇬🇧 EN
+            {% endif %}
+            <span class="chevron">▾</span>
+        </button>
+
+        <div class="locale-menu" id="localeMenu">
+            <a href="{{ path('app_locale', {locale: 'de'}) }}"
+               class="locale-item{% if app.request.locale == 'de' %} active{% endif %}">
+                🇩🇪 Deutsch
+            </a>
+
+            <a href="{{ path('app_locale', {locale: 'en'}) }}"
+               class="locale-item{% if app.request.locale == 'en' %} active{% endif %}">
+                🇬🇧 English
+            </a>
+        </div>
+    </div>
 </nav>
 
 {% block body %}{% endblock %}

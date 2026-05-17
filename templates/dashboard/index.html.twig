@@ -5,6 +5,8 @@
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 {% endblock %}
 
+{% trans_default_domain 'dashboard' %}
+
 {% block body %}
 <div class="page">
   <div class="page-header">
@@ -47,7 +49,7 @@
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
       <span>Diese Woche</span>
-      <button class="btn btn-ghost btn-sm" id="schedEditBtn" onclick="toggleScheduleEditor()">{{ "button.edit"|trans }}</button>
+      <button class="btn btn-ghost btn-sm" id="schedEditBtn" onclick="toggleScheduleEditor()">{{ "button.edit"|trans({}, 'messages')  }}</button>
     </div>
 
     <div class="week-grid" id="weekGrid">
@@ -110,7 +112,7 @@
              value="{{ reminderTime ?? '' }}"
              onchange="saveReminderTime(this.value)">
       <span class="notif-badge" id="notifBadge">{{ "dashboard.give_permission_to_remind"|trans }}</span>
-      <button class="btn btn-ghost btn-sm" onclick="requestNotifPermission()">{{ "button.allow"|trans }}</button>
+      <button class="btn btn-ghost btn-sm" onclick="requestNotifPermission()">{{ "button.allow"|trans({}, 'messages')  }}</button>
       <span style="font-size:11px;color:var(--muted)">{{ "dashboard.reminder_sub_information"|trans }}</span>
     </div>
   </div>
@@ -138,14 +140,14 @@
       <div class="health-edit-section">
         <div class="health-edit-label">{{ "dashboard.time_span"|trans }}</div>
         <div class="day-btns">
-          <button class="day-btn" data-days="7"  onclick="setChartDays(7,this)">{{ "diagrams.days.seven_days"|trans }}</button>
-          <button class="day-btn" data-days="14" onclick="setChartDays(14,this)">{{ "diagrams.days.fourteen_days"|trans }}</button>
-          <button class="day-btn" data-days="30" onclick="setChartDays(30,this)">{{ "diagrams.days.thirty_days"|trans }}</button>
-          <button class="day-btn" data-days="60" onclick="setChartDays(60,this)">{{ "diagrams.days.sixty_days"|trans }}</button>
-          <button class="day-btn" data-days="90" onclick="setChartDays(90,this)">{{ "diagrams.days.ninety_days"|trans }}</button>
+          <button class="day-btn" data-days="7"  onclick="setChartDays(7,this)">{{ "diagrams.days.seven_days"|trans({}, 'messages')  }}</button>
+          <button class="day-btn" data-days="14" onclick="setChartDays(14,this)">{{ "diagrams.days.fourteen_days"|trans({}, 'messages')  }}</button>
+          <button class="day-btn" data-days="30" onclick="setChartDays(30,this)">{{ "diagrams.days.thirty_days"|trans({}, 'messages')  }}</button>
+          <button class="day-btn" data-days="60" onclick="setChartDays(60,this)">{{ "diagrams.days.sixty_days"|trans({}, 'messages')  }}</button>
+          <button class="day-btn" data-days="90" onclick="setChartDays(90,this)">{{ "diagrams.days.ninety_days"|trans({}, 'messages')  }}</button>
         </div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="saveHealthConfig()" style="margin-top:4px">{{ "button.save"|trans }}</button>
+      <button class="btn btn-primary btn-sm" onclick="saveHealthConfig()" style="margin-top:4px">{{ "button.save"|trans({}, 'messages')  }}</button>
     </div>
 
     {# — Metric cards (populated by JS) — #}
@@ -156,15 +158,15 @@
 
     {# — Manual entry form — #}
     {% set _mm = {
-      steps:              {icon: '👣', label: "overall.steps"|trans ,     step: '1',   unit: ''},
-      sleep_minutes:      {icon: '💤', label:  "overall.sleep"|trans , step: '1',   unit:  "unit.min"|trans },
-      active_minutes:     {icon: '🏃', label:  "overall.active_time"|trans ,   step: '1',   unit: "unit.min"|trans },
-      weight_kg:          {icon: '⚖️', label:  "overall.weight"|trans ,     step: '0.1', unit: "unit.kg"|trans },
-      calories_kcal:      {icon: '🔥', label:  "overall.calories"|trans ,    step: '1',   unit: "unit.kcal"|trans},
-      heart_rate_avg:     {icon: '❤️', label:  "overall.heart_rate_avg"|trans ,  step: '1',   unit: "unit.bpm"|trans },
-      heart_rate_resting: {icon: '💗', label:  "overall.pulse"|trans ,    step: '1',   unit: "unit.bpm"|trans },
-      distance_meters:    {icon: '📍', label:  "overall.distance"|trans ,     step: '1',   unit: "unit.meter"|trans },
-      vo2_max:            {icon: '💨', label:  "overall.vo2_max"|trans ,     step: '0.1', unit: ''},
+      steps:              {icon: '👣', label: "overall.steps"|trans({}, 'messages')  ,     step: '1',   unit: ''},
+      sleep_minutes:      {icon: '💤', label:  "overall.sleep"|trans({}, 'messages')  , step: '1',   unit:  "unit.min"|trans({}, 'messages')  },
+      active_minutes:     {icon: '🏃', label:  "overall.active_time"|trans({}, 'messages')  ,   step: '1',   unit: "unit.min"|trans({}, 'messages')  },
+      weight_kg:          {icon: '⚖️', label:  "overall.weight"|trans({}, 'messages')  ,     step: '0.1', unit: "unit.kg"|trans({}, 'messages')  },
+      calories_kcal:      {icon: '🔥', label:  "overall.calories"|trans({}, 'messages')  ,    step: '1',   unit: "unit.kcal"|trans({}, 'messages') },
+      heart_rate_avg:     {icon: '❤️', label:  "overall.heart_rate_avg"|trans({}, 'messages')  ,  step: '1',   unit: "unit.bpm"|trans({}, 'messages')  },
+      heart_rate_resting: {icon: '💗', label:  "overall.pulse"|trans({}, 'messages')  ,    step: '1',   unit: "unit.bpm"|trans({}, 'messages')  },
+      distance_meters:    {icon: '📍', label:  "overall.distance"|trans({}, 'messages')  ,     step: '1',   unit: "unit.meter"|trans({}, 'messages')  },
+      vo2_max:            {icon: '💨', label:  "overall.vo2_max"|trans({}, 'messages')  ,     step: '0.1', unit: ''},
     } %}
     {% set _cardKeys  = healthDashboard.cards|map(c => c.metric) %}
     {% set _chartKeys = healthDashboard.chartMetrics ?? [] %}
@@ -181,7 +183,7 @@
     {% endif %}
 
     <div class="health-entry-toggle" onclick="toggleHealthForm()" id="healthToggle">
-      <span>✎{{ "button.track_data"|trans }}</span>
+      <span>✎{{ "button.track_data"|trans({}, 'messages')  }}</span>
       <span id="healthToggleArrow">▼</span>
     </div>
     <div class="health-entry-form" id="healthForm">
@@ -206,8 +208,8 @@
         {% endfor %}
       </div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-        <button class="btn btn-primary btn-sm" onclick="saveHealthEntry()" id="healthSaveBtn">{{ "button.save"|trans }}</button>
-        <span id="healthSaveMsg" style="font-size:12px;color:var(--green);display:none">{{ "button.saved"|trans }}</span>
+        <button class="btn btn-primary btn-sm" onclick="saveHealthEntry()" id="healthSaveBtn">{{ "button.save"|trans({}, 'messages')  }}</button>
+        <span id="healthSaveMsg" style="font-size:12px;color:var(--green);display:none">{{ "button.saved"|trans({}, 'messages')  }}</span>
       </div>
     </div>
 

@@ -54,18 +54,3 @@ unit:
     kcal:  kcal
     bpm:   bpm
     meter: m
-
-dashboard:
-    page_label:                  Training Plan
-    page_headline:               Dashboard
-    goal:                        "· Goal: Top Shape May 2027"
-    days_in_row:                 days in a row
-    empty_trainings_message:     No workouts logged yet
-    call_to_cation_first_training: Start your first workout now!
-    start_training:              Start workout
-    reminder:                    "\U0001F514 Reminder"
-    give_permission_to_remind:   Click to allow
-    reminder_sub_information:    "* Reminders require the browser to be open"
-    show_cards:                  Show cards
-    diagramms:                   Charts
-    time_span:                   Time range

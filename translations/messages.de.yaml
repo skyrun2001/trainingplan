@@ -54,18 +54,3 @@ unit:
     kcal:  kcal
     bpm:   bpm
     meter: m
-
-dashboard:
-    page_label:                  Trainingsplan
-    page_headline:               Dashboard
-    goal:                        "· Ziel: Top Form Mai 2027"
-    days_in_row:                 Tage in Folge
-    empty_trainings_message:     Noch keine Trainings geloggt
-    call_to_cation_first_training: Starte jetzt dein erstes Training!
-    start_training:              Training starten
-    reminder:                    "\U0001F514 Erinnerung"
-    give_permission_to_remind:   Klicken zum Erlauben
-    reminder_sub_information:    "* Erinnerung nur bei geöffnetem Browser"
-    show_cards:                  Karten anzeigen
-    diagramms:                   Diagramme
-    time_span:                   Zeitraum
