@@ -1,4 +1,5 @@
 logging:
+    page_title: "Log training - "
     last_session: "Last session: "
     loading: "loading ..."
     rpe_headline: "RPE — Rate of Perceived Exertion"

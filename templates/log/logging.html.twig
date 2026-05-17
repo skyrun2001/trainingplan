@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
+{% trans_default_domain 'logging' %}
 
-{% block title %}Training loggen – {{ type|upper }}{% endblock %}
+{% block title %}{{"logging.page_title" | trans}} {{ type|upper }}{% endblock %}
 
 {% block head %}
 <style>
@@ -10,7 +11,7 @@
 </style>
 {% endblock %}
 
-{% trans_default_domain 'logging' %}
+
 
 {% block body %}
 <div class="type-selector">
