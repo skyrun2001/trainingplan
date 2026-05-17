@@ -292,5 +292,5 @@ window.PAGE = {
   todayHasSessions:   {{ (_today and _today.hasSessions) ? 'true' : 'false' }},
 };
 </script>
-    {{ asset('js/dashboard.js') }}
+<script src="{{ asset('js/dashboard.js') }}"></script>
 {% endblock %}
