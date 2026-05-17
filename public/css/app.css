@@ -62,10 +62,60 @@ body {
 .nav-link:hover { color: var(--text); background: var(--surface2); }
 .nav-link.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
 
-.locale-switcher { display: flex; gap: 2px; margin-left: 6px; }
-.locale-btn { font-size: 18px; line-height: 1; padding: 4px; border-radius: 6px; text-decoration: none; opacity: 0.35; transition: opacity 0.15s; }
-.locale-btn:hover { opacity: 0.75; }
-.locale-btn.on { opacity: 1; }
+/* ── Locale switcher dropdown ── */
+.locale-switcher { position: relative; margin-left: 6px; }
+
+.locale-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.locale-button:hover { color: var(--text); background: var(--surface2); }
+.locale-switcher.open .locale-button { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+
+.chevron { font-size: 11px; transition: transform 0.2s; display: inline-block; }
+.locale-switcher.open .chevron { transform: rotate(180deg); }
+
+.locale-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 140px;
+  background: #141414;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 5px;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.locale-switcher.open .locale-menu { display: block; }
+
+.locale-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dim);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.locale-item:hover { color: var(--text); background: var(--surface2); }
+.locale-item.active { color: var(--text); font-weight: 600; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LAYOUT
