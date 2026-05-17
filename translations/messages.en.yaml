@@ -1,0 +1,32 @@
+diagrams:
+    days:
+        seven_days: 6d
+        fourteen_days: 14d
+        thirty_days: 30d
+        sixty_days: 60d
+        ninety_days: 90d
+overall:
+    trainings: Trainings
+    training: Training
+    steps: Steps
+    sleep: Sleep
+    active_time: Active Minutes
+    weight: Weight
+    calories: Calories
+    heart_rate_avg: Average Heartrate
+    pulse: Heartrate
+    distance: Distance
+    vo2_max: VO2Max
+button:
+    allow: Allow
+    edit: Edit
+    save: Save
+    track_data: Track data
+    saved: Saved
+
+unit:
+    min: min
+    kg: lb
+    kcal: kcal
+    bpm: bpm
+    meter: ft

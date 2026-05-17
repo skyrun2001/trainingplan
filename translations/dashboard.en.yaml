@@ -1,0 +1,16 @@
+dashboard:
+    page_label: Training Plan
+    page_headline: Dashboard
+    goal: Peak Fitness 2027
+    empty_trainings_message: No training tracked yet
+    call_to_cation_first_training: Start your first training session
+    start_training: Start Training
+    days_in_row: Days in a Row
+    reminder: Reminder
+    give_permission_to_remind: Click to allow notifications
+    reminder_sub_information: "* Reminders only work while the browser is open"
+    show_cards: Show Cards
+    diagramms: Charts
+    time_span: Time Period
+    sync_information: Synced via Android app · Manual entry available
+    personal_bests: Personal Bests
