@@ -155,6 +155,31 @@
     <div id="healthChartsContainer" style="margin-top:12px"></div>
 
     {# — Manual entry form — #}
+    {% set _mm = {
+      steps:              {icon: '👣', label: 'Schritte',     step: '1',   unit: ''},
+      sleep_minutes:      {icon: '💤', label: 'Schlaf (Min)', step: '1',   unit: 'min'},
+      active_minutes:     {icon: '🏃', label: 'Aktiv Min',   step: '1',   unit: 'min'},
+      weight_kg:          {icon: '⚖️', label: 'Gewicht',     step: '0.1', unit: 'kg'},
+      calories_kcal:      {icon: '🔥', label: 'Kalorien',    step: '1',   unit: 'kcal'},
+      heart_rate_avg:     {icon: '❤️', label: 'Herzrate Ø',  step: '1',   unit: 'bpm'},
+      heart_rate_resting: {icon: '💗', label: 'Ruhepuls',    step: '1',   unit: 'bpm'},
+      distance_meters:    {icon: '📍', label: 'Distanz',     step: '1',   unit: 'm'},
+      vo2_max:            {icon: '💨', label: 'VO2 Max',     step: '0.1', unit: ''},
+    } %}
+    {% set _cardKeys  = healthDashboard.cards|map(c => c.metric) %}
+    {% set _chartKeys = healthDashboard.chartMetrics ?? [] %}
+    {% set _entryKeys = [] %}
+    {% set _seen      = [] %}
+    {% for _k in _cardKeys|merge(_chartKeys) %}
+      {% if _k not in _seen %}
+        {% set _entryKeys = _entryKeys|merge([_k]) %}
+        {% set _seen      = _seen|merge([_k]) %}
+      {% endif %}
+    {% endfor %}
+    {% if _entryKeys is empty %}
+      {% set _entryKeys = ['steps', 'weight_kg', 'calories_kcal', 'sleep_minutes', 'active_minutes'] %}
+    {% endif %}
+
     <div class="health-entry-toggle" onclick="toggleHealthForm()" id="healthToggle">
       <span>✎ Daten erfassen</span>
       <span id="healthToggleArrow">▼</span>
@@ -165,7 +190,21 @@
         <input type="date" class="health-input" id="healthDate"
                value="{{ "now"|date('Y-m-d') }}" max="{{ "now"|date('Y-m-d') }}">
       </div>
-      <div class="health-entry-fields" id="healthEntryFields"></div>
+      <div class="health-entry-fields" id="healthEntryFields">
+        {% for _k in _entryKeys %}
+          {% set _d   = _mm[_k] ?? {icon: '📊', label: _k|replace({'_': ' '})|title, step: 'any', unit: ''} %}
+          {% set _cur = todayMetrics[_k] ?? '' %}
+          <div class="health-input-group">
+            <label>{{ _d.icon }} {{ _d.label }}{% if _d.unit %} <span style="color:var(--muted);font-size:9px">{{ _d.unit }}</span>{% endif %}</label>
+            <input type="number" class="health-input health-entry-input"
+                   data-metric="{{ _k }}"
+                   placeholder="--"
+                   value="{{ _cur != '' ? _cur : '' }}"
+                   step="{{ _d.step }}"
+                   min="0">
+          </div>
+        {% endfor %}
+      </div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
         <button class="btn btn-primary btn-sm" onclick="saveHealthEntry()" id="healthSaveBtn">Speichern</button>
         <span id="healthSaveMsg" style="font-size:12px;color:var(--green);display:none">✓ Gespeichert</span>
