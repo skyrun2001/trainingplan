@@ -38,6 +38,9 @@ button:
     delete_set:     "Satz löschen"
     add_set:     "+Satz hinzufügen"
     back: Zurück
+    day: "+ Tag"
+    cancel : "Abbrechen"
+    delete_day : "Tag löschen"
 
 unit:
     min:   min

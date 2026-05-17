@@ -1,13 +1,16 @@
 {% extends 'base.html.twig' %}
-{% block title %}Plan bearbeiten{% endblock %}
+
+{% trans_default_domain 'plan_edit' %}
+
+{% block title %}{{ 'edit.page_title' | trans }}{% endblock %}
 
 {% block body %}
 <div style="max-width:680px;margin:0 auto;padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between">
   <div>
-    <div class="page-label">Plan bearbeiten</div>
+    <div class="page-label">{{ 'edit.page_title' | trans }}</div>
     <div style="font-size:20px;font-weight:700">{{ plan.name }}</div>
   </div>
-  <a href="{{ path('app_plan') }}" class="btn btn-ghost btn-sm">← Ansicht</a>
+  <a href="{{ path('app_plan') }}" class="btn btn-ghost btn-sm">{{ 'button.back' | trans({}, 'messages') }}</a>
 </div>
 
 <div class="tabs" id="tabs">
@@ -19,24 +22,24 @@
       {{ day.type|capitalize }}
     </button>
   {% endfor %}
-  <button class="tab" id="addDayTab" onclick="toggleAddDayForm()" style="--accent:#888;border-style:dashed">+ Tag</button>
+  <button class="tab" id="addDayTab" onclick="toggleAddDayForm()" style="--accent:#888;border-style:dashed">{{ 'button.day' | trans({}, 'messages') }}</button>
 </div>
 
 {# Add day form — hidden by default #}
 <div id="addDayForm" style="display:none;max-width:680px;margin:0 auto 16px;padding:0 20px">
   <div class="add-exercise-area">
-    <div class="add-exercise-title"><span>+</span> Neuen Trainingstag hinzufügen</div>
+    <div class="add-exercise-title"><span>+</span> {{ 'edit.add_new_day' | trans }}</div>
     <div class="form-grid">
       <div>
-        <label class="f-label">Bezeichnung *</label>
-        <input class="f-input" id="new-day-label" placeholder="z.B. Push — Brust, Schulter, Trizeps">
+        <label class="f-label">{{ 'edit.title' | trans }}</label>
+        <input class="f-input" id="new-day-label" placeholder="{{ 'edit.title_placeholder' | trans }}">
       </div>
       <div>
-        <label class="f-label">Kürzel (für Tab) *</label>
-        <input class="f-input" id="new-day-type" placeholder="z.B. push2" maxlength="20">
+        <label class="f-label">{{ 'edit.short' | trans }}</label>
+        <input class="f-input" id="new-day-type" placeholder="{{ 'edit.short_placeholder' | trans }}" maxlength="20">
       </div>
       <div>
-        <label class="f-label">Farbe</label>
+        <label class="f-label">{{ 'edit.color' | trans }}</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:4px" id="colorPicker">
           {% for color in ['#C9184A','#2D6A4F','#E09F3E','#4361EE','#7B2D8B','#0891B2','#16A34A','#EA580C'] %}
             <button type="button"
@@ -49,13 +52,13 @@
         <input type="hidden" id="new-day-color" value="#C9184A">
       </div>
       <div>
-        <label class="f-label">Fokus / Untertitel</label>
-        <input class="f-input" id="new-day-focus" placeholder="z.B. Schwerer Tag · ~60 Min">
+        <label class="f-label">{{ 'edit.focus' | trans }}</label>
+        <input class="f-input" id="new-day-focus" placeholder="{{ 'edit.focus_placeholder' | trans }}">
       </div>
     </div>
     <div class="form-actions" style="justify-content:flex-start;margin-top:4px">
-      <button class="btn btn-ghost btn-sm" onclick="toggleAddDayForm()">Abbrechen</button>
-      <button class="btn btn-primary btn-sm" onclick="addDay()">Tag hinzufügen</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleAddDayForm()">{{ 'button.cancel' | trans({}, 'messages') }}</button>
+      <button class="btn btn-primary btn-sm" onclick="addDay()">{{ 'button.day' | trans({}, 'messages') }}</button>
     </div>
   </div>
 </div>
@@ -70,30 +73,30 @@
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div class="edit-day-title" onclick="toggleDayForm({{ day.id }})">
           <span>{{ day.label }}</span>
-          <span style="font-size:12px;font-weight:400;color:var(--dim)">✎ bearbeiten</span>
+          <span style="font-size:12px;font-weight:400;color:var(--dim)">{{ 'button.edit' | trans({}, 'messages') }}</span>
         </div>
-        <button class="icon-btn danger" title="Tag löschen" onclick="deleteDay({{ day.id }}, '{{ day.label|e('js') }}')">✕</button>
+        <button class="icon-btn danger" title="{{ 'button.delete_day' | trans({}, 'messages') }}" onclick="deleteDay({{ day.id }}, '{{ day.label|e('js') }}')">✕</button>
       </div>
       {% if day.focus %}<div style="font-size:12px;color:var(--dim);margin-top:4px">{{ day.focus }}</div>{% endif %}
 
       <div class="edit-day-form" id="day-form-{{ day.id }}">
         <div class="form-grid">
           <div>
-            <label class="f-label">Bezeichnung</label>
+            <label class="f-label">{{ 'edit.title' | trans }}</label>
             <input class="f-input" id="day-label-{{ day.id }}" value="{{ day.label }}">
           </div>
           <div>
-            <label class="f-label">Fokus / Untertitel</label>
+            <label class="f-label">{{ 'edit.focus' | trans }}</label>
             <input class="f-input" id="day-focus-{{ day.id }}" value="{{ day.focus ?? '' }}">
           </div>
           <div class="form-full">
-            <label class="f-label">Notiz</label>
-            <input class="f-input" id="day-note-{{ day.id }}" value="{{ day.note ?? '' }}" placeholder="z.B. 💡 Hinweis...">
+            <label class="f-label">{{ 'edit.notes' | trans }}</label>
+            <input class="f-input" id="day-note-{{ day.id }}" value="{{ day.note ?? '' }}" placeholder="{{ 'edit.note_placeholder' | trans }}">
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-ghost btn-sm" onclick="toggleDayForm({{ day.id }})">Abbrechen</button>
-          <button class="btn btn-primary btn-sm" onclick="saveDayForm({{ day.id }})">Speichern</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleDayForm({{ day.id }})">{{ 'button.cancel' | trans({}, 'messages') }}</button>
+          <button class="btn btn-primary btn-sm" onclick="saveDayForm({{ day.id }})">{{ 'button.save' | trans({}, 'messages') }}</button>
         </div>
       </div>
     </div>
@@ -113,7 +116,7 @@
             <div class="ex-edit-info">
               <div class="ex-edit-name">{{ ex.name }}</div>
               <div class="ex-edit-meta">
-                {{ ex.defaultSets }}× {% if ex.defaultReps %}{{ ex.defaultReps }} Wdh{% else %}—{% endif %}
+                {{ ex.defaultSets }}× {% if ex.defaultReps %}{{ ex.defaultReps }} {{ "unit.rep' | trans({}, "messages") }}{% else %}—{% endif %}
                 · {{ ex.section }}
               </div>
               {% if ex.progressionNote %}
@@ -121,47 +124,47 @@
               {% endif %}
             </div>
             <div class="ex-edit-actions">
-              <button class="icon-btn" title="Nach oben" onclick="moveEx({{ ex.id }}, 'up')">↑</button>
-              <button class="icon-btn" title="Nach unten" onclick="moveEx({{ ex.id }}, 'down')">↓</button>
-              <button class="icon-btn" title="Bearbeiten" onclick="toggleExForm({{ ex.id }})">✎</button>
-              <button class="icon-btn danger" title="Löschen" onclick="deleteEx({{ ex.id }})">✕</button>
+              <button class="icon-btn" title="{{ 'edit.up_title' | trans }}" onclick="moveEx({{ ex.id }}, 'up')">↑</button>
+              <button class="icon-btn" title="{{ 'edit.down_title' | trans }}" onclick="moveEx({{ ex.id }}, 'down')">↓</button>
+              <button class="icon-btn" title="{{ 'edit.edit_title' | trans }}" onclick="toggleExForm({{ ex.id }})">✎</button>
+              <button class="icon-btn danger" title="{{ 'edit.delete_title' | trans }}" onclick="deleteEx({{ ex.id }})">✕</button>
             </div>
           </div>
 
           <div class="ex-inline-form" id="ex-form-{{ ex.id }}">
             <div class="form-grid form-grid-3">
               <div class="form-full">
-                <label class="f-label">Übungsname</label>
+                <label class="f-label">{{ 'edit.exercise_name' | trans }}</label>
                 <input class="f-input" id="ex-name-{{ ex.id }}" value="{{ ex.name }}">
               </div>
               <div>
-                <label class="f-label">Abschnitt</label>
+                <label class="f-label">{{ 'edit.section' | trans }}</label>
                 <input class="f-input" id="ex-section-{{ ex.id }}" value="{{ ex.section }}"
                        list="sections-{{ day.id }}">
               </div>
               <div>
-                <label class="f-label">Std. Sätze</label>
+                <label class="f-label">{{ 'training.sets' | trans({}, 'messages') }}</label>
                 <input class="f-input" type="number" id="ex-sets-{{ ex.id }}" value="{{ ex.defaultSets }}" min="1" max="10">
               </div>
               <div>
-                <label class="f-label">Std. Wdh</label>
+                <label class="f-label">{{ 'unit.rep' | trans({}, 'messages') }}</label>
                 <input class="f-input" type="number" id="ex-reps-{{ ex.id }}" value="{{ ex.defaultReps ?? '' }}" placeholder="—" min="1" max="99">
               </div>
               <div class="form-full">
-                <label class="f-label">Progression / Badge-Text</label>
-                <input class="f-input" id="ex-prog-{{ ex.id }}" value="{{ ex.progressionNote ?? '' }}" placeholder="z.B. ↑ steigern auf 70 kg">
+                <label class="f-label">{{ 'edit.progression_label' | trans }}</label>
+                <input class="f-input" id="ex-prog-{{ ex.id }}" value="{{ ex.progressionNote ?? '' }}" placeholder="{{ 'edit.progression_label' | trans }} ">
               </div>
               <div>
                 <label class="f-label">&nbsp;</label>
                 <div class="checkbox-row">
                   <input type="checkbox" id="ex-new-{{ ex.id }}" {% if ex.isNew %}checked{% endif %}>
-                  <label for="ex-new-{{ ex.id }}">Als NEU markieren</label>
+                  <label for="ex-new-{{ ex.id }}">{{ 'edit.checknox_new' | trans }}</label>
                 </div>
               </div>
             </div>
             <div class="form-actions">
-              <button class="btn btn-ghost btn-sm" onclick="toggleExForm({{ ex.id }})">Abbrechen</button>
-              <button class="btn btn-primary btn-sm" onclick="saveEx({{ ex.id }})">Speichern</button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleExForm({{ ex.id }})">{{ 'button.cancel' | trans({}, 'messages') }}</button>
+              <button class="btn btn-primary btn-sm" onclick="saveEx({{ ex.id }})">{{ 'button.save' | trans({}, 'messages') }}</button>
             </div>
           </div>
         </div>
@@ -181,32 +184,32 @@
 
     {# Add new exercise #}
     <div class="add-exercise-area">
-      <div class="add-exercise-title"><span>+</span> Neue Übung hinzufügen</div>
+      <div class="add-exercise-title"><span>+</span> {{ 'edit.add_new_exercise' | trans }}</div>
       <div class="form-grid form-grid-3">
         <div class="form-full">
-          <label class="f-label">Übungsname *</label>
-          <input class="f-input" id="new-name-{{ day.id }}" placeholder="z.B. Bankdrücken">
+          <label class="f-label">{{ 'edit.excercise_name' | trans }}</label>
+          <input class="f-input" id="new-name-{{ day.id }}" placeholder="{{ 'edit.exercise_placeholder' | trans }}">
         </div>
         <div>
           <label class="f-label">Abschnitt</label>
-          <input class="f-input" id="new-section-{{ day.id }}" value="Hauptteil"
+          <input class="f-input" id="new-section-{{ day.id }}" value="{{ 'edit.section_value' | trans }}"
                  list="sections-{{ day.id }}">
         </div>
         <div>
-          <label class="f-label">Sätze</label>
+          <label class="f-label">{{ 'training.set' | trans({}, 'messages') }}</label>
           <input class="f-input" type="number" id="new-sets-{{ day.id }}" value="3" min="1" max="10">
         </div>
         <div>
-          <label class="f-label">Wdh</label>
+          <label class="f-label">{{ 'unit.rep' | trans({}, 'messages') }}</label>
           <input class="f-input" type="number" id="new-reps-{{ day.id }}" placeholder="—" min="1" max="99">
         </div>
         <div class="form-full">
-          <label class="f-label">Progression (optional)</label>
-          <input class="f-input" id="new-prog-{{ day.id }}" placeholder="z.B. ↑ steigern auf 70 kg">
+          <label class="f-label">{{ 'edit.progression_optional' | trans }}</label>
+          <input class="f-input" id="new-prog-{{ day.id }}" placeholder="{{ 'edit.progression_placeholder' | trans }}">
         </div>
       </div>
       <div class="form-actions" style="justify-content:flex-start">
-        <button class="btn btn-primary btn-sm" onclick="addExercise({{ day.id }})">Übung hinzufügen</button>
+        <button class="btn btn-primary btn-sm" onclick="addExercise({{ day.id }})">{{ 'edit.add_exercise' | trans }}</button>
       </div>
     </div>
   </div>
