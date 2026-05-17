@@ -848,7 +848,7 @@ option { background: #1a1a1a; color: var(--text); }
            background: var(--surface2); color: var(--dim); border: 1px solid var(--border); }
 
 .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
-.empty-state a { color: var(--text); }
+.empty-state a:not(.btn) { color: var(--text); }
 
 .type-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
 .type-stat { border-radius: 10px; padding: 12px 10px; text-align: center; }
