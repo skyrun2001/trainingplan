@@ -13,7 +13,7 @@ logging:
     rpe_options:
         easy: "6 · light"
         moderate: "7 moderate"
-        two: "8 hard"
+        heavy: "8 hard"
         extrem_heavy: "9 very hard"
         max: "10 max"
     detail: "Details"

@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
-{% block title %}Trainingsplan{% endblock %}
+{% trans_default_domain 'plan' %}
+{% block title %}{{ 'plan.page_title' | trans }}{% endblock %}
 
 {% block body %}
 <div class="tabs" id="tabs">

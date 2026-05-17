@@ -8,7 +8,7 @@ edit:
     color: Farbe
     focus: "Fokus/ Untertitel"
     focus_placeholder: "z.B. Schwerer Tag · ~60 Min"
-    note: Notizen
+    notes: Notizen
     note_placeholder: "z.B. Hinweise.."
     up_title : "Nach oben"
     down_title: "Nach unten"
