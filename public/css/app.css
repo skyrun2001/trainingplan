@@ -986,3 +986,69 @@ option { background: #1a1a1a; color: var(--text); }
   border:1px solid var(--border2); background:var(--surface2); color:var(--muted); transition:all 0.15s;
 }
 .day-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(67,97,238,0.08); }
+
+.auth-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 54px);
+    padding: 24px 20px;
+}
+.auth-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px 28px;
+}
+.auth-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.auth-sub { font-size: 13px; color: var(--dim); margin-bottom: 28px; }
+.field { margin-bottom: 14px; }
+.field label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.field input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 12px 14px;
+    transition: border-color 0.15s;
+}
+.field input:focus { outline: none; border-color: var(--text); }
+.auth-error {
+    background: rgba(201,24,74,0.1);
+    border: 1px solid rgba(201,24,74,0.3);
+    border-radius: 9px;
+    color: var(--push);
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+}
+.auth-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    background: var(--text);
+    color: #0A0A0A;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: opacity 0.15s;
+}
+.auth-btn:hover { opacity: 0.9; }
+.auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
+.auth-footer a { color: var(--text); text-decoration: none; }
+.hint { font-size: 11px; color: var(--muted); margin-top: 4px; }

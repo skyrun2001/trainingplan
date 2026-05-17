@@ -1,0 +1,15 @@
+auth:
+    login:
+        title:    Welcome back
+        subtitle: Sign in to continue
+        username: Username
+        password: Password
+        remember: Stay signed in (7 days)
+        submit:   Sign in
+    register:
+        title:    Create account
+        username: Username
+        password: Password
+        submit:   Create account
+        back:     Already registered?
+    registered: Account created — sign in now!

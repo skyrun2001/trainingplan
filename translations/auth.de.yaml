@@ -1,0 +1,15 @@
+auth:
+    login:
+        title:    Willkommen zurück
+        subtitle: Melde dich an um fortzufahren
+        username: Benutzername
+        password: Passwort
+        remember: Angemeldet bleiben (7 Tage)
+        submit:   Einloggen
+    register:
+        title:    Konto erstellen
+        username: Benutzername
+        password: Passwort
+        submit:   Konto erstellen
+        back:     Bereits registriert?
+    registered: Konto erstellt — jetzt einloggen!
