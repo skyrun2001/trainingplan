@@ -4,13 +4,19 @@ namespace App\EventSubscriber;
 
 use App\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Contracts\Translation\LocaleAwareInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    public function __construct(private readonly TokenStorageInterface $tokenStorage) {}
+    public function __construct(
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly TranslatorInterface $translator,
+    ) {}
 
     public function onKernelRequest(RequestEvent $event): void
     {
@@ -22,7 +28,7 @@ class LocaleSubscriber implements EventSubscriberInterface
 
         // Session locale (explicitly set by user via the switcher) wins over Accept-Language
         if ($locale = $request->getSession()->get('_locale')) {
-            $request->setLocale($locale);
+            $this->applyLocale($request, $locale);
             return;
         }
 
@@ -32,18 +38,26 @@ class LocaleSubscriber implements EventSubscriberInterface
             $settings = $user->getSettings();
             if (!empty($settings['locale'])) {
                 $locale = $settings['locale'];
-                $request->setLocale($locale);
                 $request->getSession()->set('_locale', $locale);
+                $this->applyLocale($request, $locale);
             }
         }
-        // No explicit preference → Symfony's set_locale_from_accept_language already ran (priority 32)
-        // and set the locale from the browser header; we leave it as-is.
+    }
+
+    // LocaleAwareListener (priority 15) already pushed the locale into the translator
+    // before this subscriber runs (priority 4). Calling setLocale on the translator
+    // directly re-syncs it to the corrected locale.
+    private function applyLocale(Request $request, string $locale): void
+    {
+        $request->setLocale($locale);
+        if ($this->translator instanceof LocaleAwareInterface) {
+            $this->translator->setLocale($locale);
+        }
     }
 
     public static function getSubscribedEvents(): array
     {
-        // Priority 4: after the security firewall (8) so the user token is available,
-        // but before controllers (0).
+        // After the security firewall (8) so the user token is available.
         return [KernelEvents::REQUEST => [['onKernelRequest', 4]]];
     }
 }
