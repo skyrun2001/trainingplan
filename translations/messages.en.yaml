@@ -26,6 +26,8 @@ overall:
     vo2_max:         VO2 Max
     chart_weight:    Max Weight (kg)
     chart_reps:      Max Reps
+    date: "Datum"
+    duration: "Dauer"
 
 button:
     allow:      Allow
@@ -33,6 +35,9 @@ button:
     save:       Save
     track_data: Track data
     saved:      Saved
+    delete_set: "Delete set"
+    add_set: "Add set"
+    back: Back
 
 unit:
     min:   min
@@ -40,3 +45,7 @@ unit:
     kcal:  kcal
     bpm:   bpm
     meter: m
+    repetitions_abbr: Rep
+
+trainings:
+    set: Sets

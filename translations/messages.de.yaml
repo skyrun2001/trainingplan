@@ -26,6 +26,8 @@ overall:
     vo2_max:         VO2 Max
     chart_weight:    Max. Gewicht (kg)
     chart_reps:      Max. Wdh.
+    date: "Datum"
+    duration: "Dauer"
 
 button:
     allow:      Erlauben
@@ -33,6 +35,9 @@ button:
     save:       Speichern
     track_data: Daten erfassen
     saved:      Gespeichert
+    delete_set:     "Satz löschen"
+    add_set:     "+Satz hinzufügen"
+    back: Zurück
 
 unit:
     min:   min
@@ -40,3 +45,7 @@ unit:
     kcal:  kcal
     bpm:   bpm
     meter: m
+    repetitions_abbr: Wdh
+
+trainings:
+    set: Sätze
