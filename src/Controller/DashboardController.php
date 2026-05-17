@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\HealthMetric;
+use App\Entity\User;
 use App\Repository\ExerciseLogRepository;
 use App\Repository\HealthMetricRepository;
 use App\Repository\WorkoutSessionRepository;
@@ -48,14 +49,14 @@ class DashboardController extends AbstractController
 
         // Health: generic key-value metrics
         $settings        = $user->getSettings();
+        $availableKeys   = $healthRepo->findAllMetricKeysForUser($user);
         $healthDashboard = $this->resolveHealthDashboard(
             $settings['healthDashboard'] ?? null,
-            $healthRepo->findAllMetricKeysForUser($user)
+            $availableKeys
         );
         $chartDays       = $healthDashboard['chartDays'];
         $healthHistory   = $healthRepo->findRecentGroupedForUser($user, $chartDays);
         $todayMetrics    = $healthRepo->findTodayForUser($user);
-        $availableKeys   = $healthRepo->findAllMetricKeysForUser($user);
 
         return $this->render('dashboard/index.html.twig', [
             'sessions'         => $recentSessions,
@@ -65,7 +66,7 @@ class DashboardController extends AbstractController
             'personalBests'    => $personalBests,
             'weeklyData'       => $weeklyData,
             'exerciseNames'    => $exerciseRepo->findAllExerciseNamesForUser($user),
-            'weekDays'         => $this->buildCurrentWeek($sessionRepo),
+            'weekDays'         => $this->buildCurrentWeek($last4Weeks, $user),
             'schedule'         => $user->getWeekSchedule(),
             'reminderTime'     => $user->getReminderTime(),
             // Health
@@ -238,16 +239,16 @@ class DashboardController extends AbstractController
         ];
     }
 
-    private function buildCurrentWeek(WorkoutSessionRepository $repo): array
+    private function buildCurrentWeek(array $last4Weeks, User $user): array
     {
-        $user      = $this->getUser();
         $today     = new \DateTime('today');
         $weekStart = (clone $today)->modify('monday this week');
+        $weekEnd   = (clone $weekStart)->modify('+6 days');
 
-        $weekSessions = $repo->findByDateRangeAndUser(
-            $weekStart,
-            (clone $weekStart)->modify('+6 days'),
-            $user
+        // Reuse already-fetched 28-day data instead of a separate DB query
+        $weekSessions = array_filter(
+            $last4Weeks,
+            fn($s) => $s->getDate() >= $weekStart && $s->getDate() <= $weekEnd
         );
 
         $schedule = $user->getWeekSchedule();
