@@ -1,0 +1,11 @@
+security:
+    # bcrypt cost 4 instead of the default 13 — login is ~50 ms vs ~400 ms in dev
+    password_hashers:
+        App\Entity\User:
+            algorithm: bcrypt
+            cost: 4
+
+    firewalls:
+        # login_throttling writes/reads the cache on every login attempt; not useful in dev
+        main:
+            login_throttling: false
