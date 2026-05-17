@@ -116,7 +116,7 @@
             <div class="ex-edit-info">
               <div class="ex-edit-name">{{ ex.name }}</div>
               <div class="ex-edit-meta">
-                {{ ex.defaultSets }}× {% if ex.defaultReps %}{{ ex.defaultReps }} {{ "unit.rep' | trans({}, "messages") }}{% else %}—{% endif %}
+                {{ ex.defaultSets }}× {% if ex.defaultReps %}{{ ex.defaultReps }} {{ 'unit.rep' | trans({}, 'messages') }}{% else %}—{% endif %}
                 · {{ ex.section }}
               </div>
               {% if ex.progressionNote %}

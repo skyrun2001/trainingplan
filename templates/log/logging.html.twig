@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 {% trans_default_domain 'logging' %}
 
-{% block title %}{{"logging.page_title" | trans}} {{ type|upper }}{% endblock %}
+{% block title %}{{'logging.page_title' | trans}} {{ type|upper }}{% endblock %}
 
 {% block head %}
 <style>
@@ -43,12 +43,12 @@
           <span class="ex-num-badge">{{ loop.index0 }}</span>
           <div>
             <div class="ex-title">{{ ex.name }}</div>
-            <div class="ex-summary" id="summary-{{ loop.index0 }}">{{ ex.defaultSets }} {{"trainings.set" | trans({}, "messages")}} · {{ ex.defaultReps ?? '—' }} {{"unit.repetitions_abbr" | trans({}, "messages")}}</div>
+            <div class="ex-summary" id="summary-{{ loop.index0 }}">{{ ex.defaultSets }} {{'trainings.set' | trans({}, 'messages')}} · {{ ex.defaultReps ?? '—' }} {{'unit.repetitions_abbr' | trans({}, 'messages')}}</div>
           </div>
           <span class="ex-chevron" id="chevron-{{ loop.index0 }}">▼</span>
         </div>
         <div class="sets-container" id="sets-{{ loop.index0 }}">
-          <div class="prev-hint" id="prev-{{ loop.index0 }}">{{"logging.last_session" | trans}} <span>{{"logging.loading" | trans}}</span></div>
+          <div class="prev-hint" id="prev-{{ loop.index0 }}">{{'logging.last_session' | trans}} <span>{{'logging.loading' | trans}}</span></div>
           <div class="col-headers">
             <div class="col-header"></div>
             <div class="col-header">Wdh</div>
@@ -56,13 +56,13 @@
             <div class="col-header rpe-header">
               RPE <span class="rpe-info-icon">ⓘ</span>
               <div class="rpe-tooltip">
-                <strong>{{"logging.rpe_headline" | trans}} </strong><br>
-                  {{"logging.rpe_subtitle" | trans}} <br><br>
-                <span style="color:#4CAF7D">6</span>{{"logging.rpe_explanation.four_plus" | trans}} <br>
-                <span style="color:#4CAF7D">7</span>{{"logging.rpe_explanation.three" | trans}} <br>
-                <span style="color:#E0A03E">8</span>{{"logging.rpe_explanation.two" | trans}}<br>
-                <span style="color:#E0A03E">9</span>{{"logging.rpe_explanation.one" | trans}} <br>
-                <span style="color:#C9184A">10</span>{{"logging.rpe_explanation.zero" | trans}}
+                <strong>{{'logging.rpe_headline' | trans}} </strong><br>
+                  {{'logging.rpe_subtitle' | trans}} <br><br>
+                <span style="color:#4CAF7D">6</span>{{'logging.rpe_explanation.four_plus' | trans}} <br>
+                <span style="color:#4CAF7D">7</span>{{'logging.rpe_explanation.three' | trans}} <br>
+                <span style="color:#E0A03E">8</span>{{'logging.rpe_explanation.two' | trans}}<br>
+                <span style="color:#E0A03E">9</span>{{'logging.rpe_explanation.one' | trans}} <br>
+                <span style="color:#C9184A">10</span>{{'logging.rpe_explanation.zero' | trans}}
               </div>
             </div>
             <div></div>
@@ -72,55 +72,55 @@
               <div class="set-row">
                 <span class="set-label">{{ i }}</span>
                   <label>
-                      <input type="number" class="set-input reps-input" placeholder={{"unit.rep" | trans({}, "messages")}} min="1" max="99"
+                      <input type="number" class="set-input reps-input" placeholder="{{'unit.rep' | trans({}, 'messages')}}" min="1" max="99"
                              value="{{ ex.defaultReps ?? '' }}" data-set="{{ i }}" oninput="updateSummary({{ loop.parent.loop.index0 }})">
                   </label>
                   <label>
-                      <input type="number" class="set-input weight-input" placeholder={{"unit.kg" | trans({}, "messages")}} min="0" max="999" step="0.5"
+                      <input type="number" class="set-input weight-input" placeholder="{{'unit.kg' | trans({}, 'messages')}}" min="0" max="999" step="0.5"
                            data-set="{{ i }}" oninput="onWeightInput(this); updateSummary({{ loop.parent.loop.index0 }})">
                   </label>
                   <label>
                       <select class="set-input rpe-input" data-set="{{ i }}" onchange="onRpeChange(this)">
                       <option value="">—</option>
-                      <option value="6">{{"logging.rpe_options.easy" | trans}}</option>
-                      <option value="7">{{"logging.rpe_options.moderate" | trans}}</option>
-                      <option value="8">{{"logging.rpe_options.heavy" | trans}}</option>
-                      <option value="9">{{"logging.rpe_options.extrem_heavy" | trans}}</option>
-                      <option value="10">{{"logging.rpe_options.max" | trans}}</option>
+                      <option value="6">{{'logging.rpe_options.easy' | trans}}</option>
+                      <option value="7">{{'logging.rpe_options.moderate' | trans}}</option>
+                      <option value="8">{{'logging.rpe_options.heavy' | trans}}</option>
+                      <option value="9">{{'logging.rpe_options.extrem_heavy' | trans}}</option>
+                      <option value="10">{{'logging.rpe_options.max' | trans}}</option>
                     </select>
                   </label>
-                  <button class="remove-set" onclick="removeSet(this)" title={{"button.delete_set" |trans({}, "messages")}}>×</button>
+                  <button class="remove-set" onclick="removeSet(this)" title="{{'button.delete_set' |trans({}, 'messages')}}">×</button>
               </div>
             {% endfor %}
           </div>
-          <button class="add-set-btn" onclick="addSet({{ loop.index0 }})">{{"button.add_set" |trans({}, "messages")}}</button>
+          <button class="add-set-btn" onclick="addSet({{ loop.index0 }})">{{'button.add_set' |trans({}, 'messages')}}</button>
         </div>
       </div>
     {% endfor %}
   </div>
 
   <hr class="divider" style="margin-top:20px">
-  <div class="section-sep">{{"logging.detail" | trans}}</div>
+  <div class="section-sep">{{'logging.detail' | trans}}</div>
   <div class="meta-row">
     <div class="meta-field">
-      <label for="metaDate">{{"overall.date" |trans({}, "messages")}}</label>
+      <label for="metaDate">{{'overall.date' |trans({}, 'messages')}}</label>
       <input type="date" id="metaDate" value="{{ "now"|date("Y-m-d") }}">
     </div>
     <div class="meta-field">
-      <label for="metaDuration">{{"overall.duration" |trans({}, "messages")}} ({{"unit.min" |trans({}, "messages")}})</label>
+      <label for="metaDuration">{{'overall.duration' |trans({}, 'messages')}} ({{'unit.min' |trans({}, 'messages')}})</label>
       <input type="number" id="metaDuration" placeholder="z.B. 60" min="10" max="180">
     </div>
   </div>
   <div class="meta-field">
-    <label for="metaNotes">{{"logging.notes" |trans}}</label>
-    <textarea id="metaNotes" placeholder= {{"logging.notes_description" |trans}}></textarea>
+    <label for="metaNotes">{{'logging.notes' |trans}}</label>
+    <textarea id="metaNotes" placeholder="{{'logging.notes_description' |trans}}"></textarea>
   </div>
   <div style="height:80px"></div>
 </div>
 
 <div class="submit-bar">
-  <a href="{{ path('app_plan') }}" class="btn btn-ghost">{{"button.back" |trans({}, "messages")}}</a>
-  <button class="btn btn-primary" id="saveBtn" onclick="saveWorkout()">{{"button.save" |trans({}, "messages")}}</button>
+  <a href="{{ path('app_plan') }}" class="btn btn-ghost">{{'button.back' |trans({}, 'messages')}}</a>
+  <button class="btn btn-primary" id="saveBtn" onclick="saveWorkout()">{{'button.save' |trans({}, 'messages')}}</button>
 </div>
 {% endblock %}
 
