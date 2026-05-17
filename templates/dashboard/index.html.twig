@@ -93,8 +93,8 @@
       {% set typeOptions = {'': '—', 'push': 'PUSH', 'pull': 'PULL', 'legs': 'BEIN', 'upper': 'UPPR'} %}
       {% for day in weekDays %}
         <div class="sched-col">
-          <label>{{ day.label }}</label>
-          <select class="sched-select" data-weekday="{{ day.isoWeekday }}" onchange="saveSchedule()">
+          <label for="sched-date">{{ day.label }}</label>
+          <select class="sched-select" data-weekday="{{ day.isoWeekday }}" onchange="saveSchedule()" id="sched-date">
             {% for val, lbl in typeOptions %}
               <option value="{{ val }}" {% if schedule[day.isoWeekday] == val %}selected{% endif %}>{{ lbl }}</option>
             {% endfor %}
@@ -105,7 +105,7 @@
 
     {# Reminder #}
     <div class="reminder-row">
-      <label>🔔 Erinnerung</label>
+      <label for="reminderTime">🔔 Erinnerung</label>
       <input type="time" class="reminder-time-input" id="reminderTime"
              value="{{ reminderTime ?? '' }}"
              onchange="saveReminderTime(this.value)">
@@ -161,7 +161,7 @@
     </div>
     <div class="health-entry-form" id="healthForm">
       <div class="health-input-group" style="margin-bottom:8px">
-        <label>Datum</label>
+        <label for="healthDate">Datum</label>
         <input type="date" class="health-input" id="healthDate"
                value="{{ "now"|date('Y-m-d') }}" max="{{ "now"|date('Y-m-d') }}">
       </div>
@@ -292,5 +292,5 @@ window.PAGE = {
   todayHasSessions:   {{ (_today and _today.hasSessions) ? 'true' : 'false' }},
 };
 </script>
-<script src="/js/dashboard.js"></script>
+    {{ asset('js/dashboard.js') }}
 {% endblock %}
