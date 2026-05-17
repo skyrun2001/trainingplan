@@ -4,7 +4,7 @@ dashboard:
     goal: Top Form 2027
     empty_trainings_message: Noch kein Training getrackt
     call_to_cation_first_training: Starte dein erstes Training
-    start_training: Start Training
+    start_training: Training starten
     days_in_row: Tage in Folge
     reminder:  "\U0001F514 Erinnerung"
     give_permission_to_remind: Klicken zum Erlauben
