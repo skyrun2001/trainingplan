@@ -25,7 +25,7 @@
       {{ labels[type] }}
     </div>
     <div class="progress-bar-wrap" style="margin-top:12px">
-      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      <div class="progress-bar-fill" id="progressBar" style="width:0"></div>
     </div>
   </div>
 
@@ -68,19 +68,25 @@
             {% for i in 1..ex.defaultSets %}
               <div class="set-row">
                 <span class="set-label">{{ i }}</span>
-                <input type="number" class="set-input reps-input" placeholder="Wdh" min="1" max="99"
-                       value="{{ ex.defaultReps ?? '' }}" data-set="{{ i }}" oninput="updateSummary({{ loop.parent.loop.index0 }})">
-                <input type="number" class="set-input weight-input" placeholder="kg" min="0" max="999" step="0.5"
-                       data-set="{{ i }}" oninput="onWeightInput(this); updateSummary({{ loop.parent.loop.index0 }})">
-                <select class="set-input rpe-input" data-set="{{ i }}" onchange="onRpeChange(this)">
-                  <option value="">—</option>
-                  <option value="6">6 · easy</option>
-                  <option value="7">7 · moderat</option>
-                  <option value="8">8 · schwer</option>
-                  <option value="9">9 · sehr schwer</option>
-                  <option value="10">10 · max</option>
-                </select>
-                <button class="remove-set" onclick="removeSet(this)" title="Satz löschen">×</button>
+                  <label>
+                      <input type="number" class="set-input reps-input" placeholder="Wdh" min="1" max="99"
+                             value="{{ ex.defaultReps ?? '' }}" data-set="{{ i }}" oninput="updateSummary({{ loop.parent.loop.index0 }})">
+                  </label>
+                  <label>
+                      <input type="number" class="set-input weight-input" placeholder="kg" min="0" max="999" step="0.5"
+                           data-set="{{ i }}" oninput="onWeightInput(this); updateSummary({{ loop.parent.loop.index0 }})">
+                  </label>
+                  <label>
+                      <select class="set-input rpe-input" data-set="{{ i }}" onchange="onRpeChange(this)">
+                      <option value="">—</option>
+                      <option value="6">6 · easy</option>
+                      <option value="7">7 · moderat</option>
+                      <option value="8">8 · schwer</option>
+                      <option value="9">9 · sehr schwer</option>
+                      <option value="10">10 · max</option>
+                    </select>
+                  </label>
+                  <button class="remove-set" onclick="removeSet(this)" title="Satz löschen">×</button>
               </div>
             {% endfor %}
           </div>
@@ -94,16 +100,16 @@
   <div class="section-sep">Details</div>
   <div class="meta-row">
     <div class="meta-field">
-      <label>Datum</label>
+      <label for="metaDate">Datum</label>
       <input type="date" id="metaDate" value="{{ "now"|date("Y-m-d") }}">
     </div>
     <div class="meta-field">
-      <label>Dauer (Min)</label>
+      <label for="metaDuration">Dauer (Min)</label>
       <input type="number" id="metaDuration" placeholder="z.B. 60" min="10" max="180">
     </div>
   </div>
   <div class="meta-field">
-    <label>Notizen (optional)</label>
+    <label for="metaNotes">Notizen (optional)</label>
     <textarea id="metaNotes" placeholder="Wie war das Training? Besonderheiten?"></textarea>
   </div>
   <div style="height:80px"></div>

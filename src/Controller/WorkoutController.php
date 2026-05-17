@@ -34,7 +34,7 @@ class WorkoutController extends AbstractController
 
         $exercises = $day ? $day->getExercisesAsArray() : [];
 
-        return $this->render('log/index.html.twig', [
+        return $this->render('log/logging.html.twig', [
             'type'          => $type,
             'exercises'     => $exercises,
             // Pre-encoded with JSON_HEX_TAG so </script> in exercise names cannot break out
