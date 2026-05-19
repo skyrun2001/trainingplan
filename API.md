@@ -302,6 +302,68 @@ Update one or more user settings. Only fields present in the body are modified.
 
 ---
 
+## Device Tokens (Push Notifications)
+
+Register an FCM token so the server can send daily low-stock supplement alerts.
+The server uses the **Firebase Cloud Messaging HTTP v1 API** with a service account.
+
+### POST /api/device/token
+
+Register or refresh a device's FCM token.
+If the token already exists (e.g. previous install of the app), it is re-assigned
+to the authenticated user and the platform is updated.
+
+**Auth required:** Bearer token
+
+**Request body:**
+```json
+{
+  "token": "fcm_registration_token_string",
+  "platform": "android"
+}
+```
+
+| Field    | Required | Values              | Default    |
+|----------|----------|---------------------|------------|
+| token    | Yes      | FCM registration token | —       |
+| platform | No       | `"android"`, `"ios"` | `"android"` |
+
+**Response 201:**
+```json
+{ "success": true, "id": 7 }
+```
+
+**Errors:**
+| Code | Reason               |
+|------|----------------------|
+| 400  | token is missing     |
+
+---
+
+### DELETE /api/device/token
+
+Unregister an FCM token (call on logout or before refreshing a token).
+
+**Auth required:** Bearer token
+
+**Request body:**
+```json
+{ "token": "fcm_registration_token_string" }
+```
+
+**Response 200:**
+```json
+{ "success": true }
+```
+
+**Errors:**
+| Code | Reason                              |
+|------|-------------------------------------|
+| 400  | token is missing                    |
+| 404  | token not found or owned by another user |
+
+---
+
 ## Supplements
 
 All supplement endpoints require a Bearer token. The supplement object returned by every endpoint has the following shape:
@@ -533,3 +595,63 @@ smart formatting):
 | vo2_max            | —           | Line       |
 
 Any other key is stored and displayed with a generic 📊 icon and auto-formatted label.
+
+---
+
+## Server-Side Push Notifications Setup
+
+### 1. Firebase service account
+
+1. Open [Firebase Console](https://console.firebase.google.com) → your project → Project Settings → Service Accounts
+2. Click **Generate new private key** → download the JSON file
+3. Place it somewhere outside `public/` (e.g. `/home/deploy/firebase_credentials.json`)
+4. In `.env.local` on the server:
+   ```
+   FIREBASE_CREDENTIALS_PATH=/home/deploy/firebase_credentials.json
+   ```
+
+### 2. Android app — register the token
+
+On app start (and whenever `FirebaseMessaging.getInstance().token` refreshes), call:
+```
+POST /api/auth/token          ← obtain Bearer token once at login
+POST /api/device/token        ← register FCM token
+  Authorization: Bearer <token>
+  { "token": "<fcm_token>", "platform": "android" }
+```
+
+On logout:
+```
+DELETE /api/device/token
+  { "token": "<fcm_token>" }
+```
+
+### 3. Daily cron job
+
+Add to crontab on the server (`crontab -e`):
+```
+# Run at 08:00 every morning
+0 8 * * * /usr/bin/php /var/www/trainingplan/bin/console app:supplements:check --env=prod >> /var/log/supplement_check.log 2>&1
+```
+
+Test without sending notifications:
+```bash
+php bin/console app:supplements:check --dry-run
+```
+
+### 4. Notification payload received by the app
+
+```json
+{
+  "notification": {
+    "title": "2 supplements running low",
+    "body": "Creatine (~3d left), Vitamin D (empty)"
+  },
+  "data": {
+    "type": "supplement_low",
+    "count": "2"
+  }
+}
+```
+
+Use `data.type = "supplement_low"` to route the tap to the supplement screen.

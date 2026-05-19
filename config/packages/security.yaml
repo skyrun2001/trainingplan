@@ -17,7 +17,7 @@ security:
             pattern: ^/api/auth
             security: false
         api:
-            pattern: ^/api/(health|supplements)
+            pattern: ^/api/(health|supplements|device)
             stateless: true
             custom_authenticators:
                 - App\Security\ApiTokenAuthenticator
@@ -45,6 +45,7 @@ security:
         - { path: ^/api/auth,        roles: PUBLIC_ACCESS }
         - { path: ^/api/health,      roles: ROLE_USER }
         - { path: ^/api/supplements, roles: ROLE_USER }
+        - { path: ^/api/device,      roles: ROLE_USER }
         - { path: ^/login,           roles: PUBLIC_ACCESS }
         - { path: ^/,                roles: ROLE_USER }
 

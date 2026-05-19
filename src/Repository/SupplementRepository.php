@@ -32,9 +32,29 @@ class SupplementRepository extends ServiceEntityRepository
     /** @return Supplement[] supplements where days remaining <= warningDays */
     public function findLowStockForUser(User $user): array
     {
-        return array_filter(
+        return array_values(array_filter(
             $this->findAllForUser($user),
             fn(Supplement $s) => $s->isLow() || $s->isEmpty()
-        );
+        ));
+    }
+
+    /**
+     * All low/empty supplements across ALL users, with user eagerly loaded.
+     * Used by the supplement check console command.
+     *
+     * @return Supplement[]
+     */
+    public function findAllLowStockGlobal(): array
+    {
+        $all = $this->createQueryBuilder('s')
+            ->join('s.user', 'u')
+            ->addSelect('u')
+            ->getQuery()
+            ->getResult();
+
+        return array_values(array_filter(
+            $all,
+            fn(Supplement $s) => $s->isLow() || $s->isEmpty()
+        ));
     }
 }
