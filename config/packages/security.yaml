@@ -17,7 +17,7 @@ security:
             pattern: ^/api/auth
             security: false
         api:
-            pattern: ^/api/health
+            pattern: ^/api/(health|supplements)
             stateless: true
             custom_authenticators:
                 - App\Security\ApiTokenAuthenticator
@@ -42,10 +42,11 @@ security:
                 lifetime: 604800
 
     access_control:
-        - { path: ^/api/auth,   roles: PUBLIC_ACCESS }
-        - { path: ^/api/health, roles: ROLE_USER }
-        - { path: ^/login,      roles: PUBLIC_ACCESS }
-        - { path: ^/,           roles: ROLE_USER }
+        - { path: ^/api/auth,        roles: PUBLIC_ACCESS }
+        - { path: ^/api/health,      roles: ROLE_USER }
+        - { path: ^/api/supplements, roles: ROLE_USER }
+        - { path: ^/login,           roles: PUBLIC_ACCESS }
+        - { path: ^/,                roles: ROLE_USER }
 
 when@test:
     security:

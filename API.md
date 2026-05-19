@@ -302,6 +302,161 @@ Update one or more user settings. Only fields present in the body are modified.
 
 ---
 
+## Supplements
+
+All supplement endpoints require a Bearer token. The supplement object returned by every endpoint has the following shape:
+
+```json
+{
+  "id": 1,
+  "name": "Creatine",
+  "dosage": "5 g",
+  "servingsPerDay": 1,
+  "servingsRemaining": 27.0,
+  "totalServings": 60.0,
+  "unit": "Portionen",
+  "warningDays": 7,
+  "notes": "Take with water",
+  "sortOrder": 0,
+  "daysRemaining": 27.0,
+  "stockPercent": 45.0,
+  "stockStatus": "ok",
+  "isLow": false,
+  "isEmpty": false
+}
+```
+
+**`stockStatus`** is one of:
+- `"ok"` — days remaining > warningDays
+- `"low"` — days remaining ≤ warningDays (but > 0)
+- `"empty"` — servingsRemaining = 0
+
+---
+
+### GET /api/supplements
+
+List all supplements sorted by sortOrder, then creation date.
+
+**Auth required:** Bearer token
+
+**Response 200:** Array of supplement objects.
+
+---
+
+### POST /api/supplements
+
+Create a supplement.
+
+**Auth required:** Bearer token
+
+**Request body:**
+```json
+{
+  "name": "Creatine",
+  "dosage": "5 g",
+  "servingsPerDay": 1,
+  "servingsRemaining": 60.0,
+  "totalServings": 60.0,
+  "unit": "Portionen",
+  "warningDays": 7,
+  "notes": "Take with water",
+  "sortOrder": 0
+}
+```
+
+Required: `name`. All other fields optional (sensible defaults apply).
+
+**Response 201:** Created supplement object.
+
+**Errors:**
+| Code | Reason                          |
+|------|---------------------------------|
+| 400  | name missing or invalid         |
+
+---
+
+### PATCH /api/supplements/{id}
+
+Update fields on an existing supplement. Only provided fields are changed.
+
+**Auth required:** Bearer token
+
+**Request body:** Any subset of the POST body (name is not required).
+
+**Response 200:** Updated supplement object.
+
+**Errors:**
+| Code | Reason        |
+|------|---------------|
+| 404  | Not found     |
+| 400  | Invalid field |
+
+---
+
+### POST /api/supplements/{id}/dose
+
+Log a dose — decrements `servingsRemaining` by the supplement's `servingsPerDay`
+(or a custom amount if `amount` is provided).
+
+**Auth required:** Bearer token
+
+**Request body (all optional):**
+```json
+{ "amount": 1.0 }
+```
+
+If `amount` is omitted, `servingsPerDay` is used. Amount is clamped to ≥ 0.
+
+**Response 200:** Updated supplement object.
+
+**Errors:**
+| Code | Reason    |
+|------|-----------|
+| 404  | Not found |
+
+---
+
+### POST /api/supplements/{id}/restock
+
+Replace pack — sets both `totalServings` and `servingsRemaining` to the new value.
+
+**Auth required:** Bearer token
+
+**Request body:**
+```json
+{ "servings": 60.0 }
+```
+
+`servings` must be a positive number.
+
+**Response 200:** Updated supplement object.
+
+**Errors:**
+| Code | Reason                          |
+|------|---------------------------------|
+| 404  | Not found                       |
+| 400  | servings missing or not positive |
+
+---
+
+### DELETE /api/supplements/{id}
+
+Delete a supplement permanently.
+
+**Auth required:** Bearer token
+
+**Response 200:**
+```json
+{ "success": true }
+```
+
+**Errors:**
+| Code | Reason    |
+|------|-----------|
+| 404  | Not found |
+
+---
+
 ## Web-Only Endpoints (Session Cookie Auth)
 
 ### POST /health/save
@@ -356,6 +511,7 @@ All error responses share the same shape:
 | POST     | /log/save        | Save completed workout    |
 | DELETE   | /log/{id}/delete | Delete a workout session  |
 | POST     | /health/save     | Manual health entry       |
+| GET      | /supplements     | Supplement tracker page   |
 
 ---
 

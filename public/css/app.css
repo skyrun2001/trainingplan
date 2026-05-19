@@ -1056,3 +1056,81 @@ option { background: #1a1a1a; color: var(--text); }
 .auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
 .auth-footer a { color: var(--text); text-decoration: none; }
 .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── Supplement page ─────────────────────────────────────────────────────── */
+.suppl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+.suppl-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.suppl-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+.suppl-card-info { flex: 1; min-width: 0; }
+.suppl-name { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.suppl-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.suppl-notes { font-size: 12px; color: var(--muted); font-style: italic; }
+
+.suppl-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.badge-ok    { background: rgba(109,182,255,.12); color: var(--accent); }
+.badge-low   { background: rgba(224,160,62,.15);  color: var(--warn);   }
+.badge-empty { background: rgba(201,24,74,.12);   color: var(--push);   }
+
+.suppl-progress-wrap {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+}
+.suppl-progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .4s ease;
+    min-width: 2px;
+}
+.suppl-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: -4px;
+}
+
+.suppl-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.low-stock-banner {
+    background: rgba(224,160,62,.12);
+    border: 1px solid rgba(224,160,62,.3);
+    border-radius: 10px;
+    color: var(--warn);
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+}
+
+.empty-hint { color: var(--muted); font-size: 14px; grid-column: 1/-1; text-align: center; padding: 40px 0; }

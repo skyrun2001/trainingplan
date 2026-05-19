@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+{% block title %}Supplements – Lukas{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:900px;margin:0 auto;padding:24px 16px 60px">
+
+  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <h1 class="section-title" style="margin:0">Supplements</h1>
+    <button class="btn btn-primary" onclick="Suppl.openAddModal()">+ Add</button>
+  </div>
+
+  {# Low-stock alert banner #}
+  <div id="lowStockBanner" class="low-stock-banner" style="display:none"></div>
+
+  {# Cards grid #}
+  <div class="suppl-grid" id="supplGrid">
+    {% if supplements is empty %}
+      <p class="empty-hint">No supplements yet. Add your first one!</p>
+    {% endif %}
+  </div>
+
+</div>
+
+{# ── Add / Edit modal ─────────────────────────────────────────────────────── #}
+<div class="modal-overlay" id="supplModal" style="display:none">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span id="modalTitle">Add Supplement</span>
+      <button class="modal-close" onclick="Suppl.closeModal()">✕</button>
+    </div>
+    <form id="supplForm" onsubmit="Suppl.saveForm(event)">
+      <input type="hidden" id="supplId">
+
+      <label class="form-label">Name *</label>
+      <input class="form-input" id="fName" maxlength="100" required placeholder="e.g. Creatine">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label class="form-label">Dosage</label>
+          <input class="form-input" id="fDosage" maxlength="50" placeholder="5 g">
+        </div>
+        <div>
+          <label class="form-label">Unit label</label>
+          <input class="form-input" id="fUnit" maxlength="30" placeholder="Portionen">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <label class="form-label">Servings/day</label>
+          <input class="form-input" id="fServingsPerDay" type="number" min="1" max="99" value="1">
+        </div>
+        <div>
+          <label class="form-label">Remaining</label>
+          <input class="form-input" id="fServingsRemaining" type="number" min="0" step="0.5" value="0">
+        </div>
+        <div>
+          <label class="form-label">Pack size</label>
+          <input class="form-input" id="fTotalServings" type="number" min="0" step="0.5" value="0">
+        </div>
+      </div>
+
+      <label class="form-label">Warn when &lt; days remaining</label>
+      <input class="form-input" id="fWarningDays" type="number" min="1" max="90" value="7">
+
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="fNotes" maxlength="255" placeholder="Optional">
+
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-ghost" onclick="Suppl.closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Restock modal ────────────────────────────────────────────────────────── #}
+<div class="modal-overlay" id="restockModal" style="display:none">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header">
+      <span>Restock — <span id="restockName"></span></span>
+      <button class="modal-close" onclick="Suppl.closeRestock()">✕</button>
+    </div>
+    <label class="form-label">New pack size (servings)</label>
+    <input class="form-input" id="restockServings" type="number" min="1" step="0.5" value="60">
+    <p style="font-size:12px;color:var(--muted);margin-top:4px">Sets both total pack size and remaining servings to this number.</p>
+    <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="Suppl.closeRestock()">Cancel</button>
+      <button class="btn btn-primary" onclick="Suppl.confirmRestock()">Restock</button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.PAGE = window.PAGE || {};
+window.PAGE.supplements = {{ supplementsJson|raw }};
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('js/supplement.js') }}"></script>
+{% endblock %}

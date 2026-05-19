@@ -1,8 +1,9 @@
 nav:
-    plan:      Plan
-    log:       Log
-    dashboard: Dashboard
-    logout:    Log out
+    plan:        Plan
+    log:         Log
+    dashboard:   Dashboard
+    supplements: Supplements
+    logout:      Log out
 
 diagrams:
     days:
