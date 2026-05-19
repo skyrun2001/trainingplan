@@ -289,6 +289,9 @@
       <a href="{{ path('app_log') }}" class="btn btn-ghost btn-sm">+ Neu</a>
     </div>
     {% for session in sessions %}
+      {% set sc = session.score %}
+      {% set scColor = sc is not null ? (sc >= 90 ? '#a78bfa' : sc >= 80 ? '#22c55e' : sc >= 70 ? '#6DB6FF' : sc >= 60 ? '#E0A03E' : sc >= 50 ? '#F77F00' : '#555555') : 'var(--muted)' %}
+      {% set scGrade = sc is not null ? (sc >= 90 ? 'S' : sc >= 80 ? 'A' : sc >= 70 ? 'B' : sc >= 60 ? 'C' : sc >= 50 ? 'D' : 'F') : '—' %}
       <div class="session-item" id="session-{{ session.id }}">
         <div class="session-dot" style="background:{{ session.typeColor }}"></div>
         <div class="session-body">
@@ -311,6 +314,25 @@
           {% endif %}
           {% if session.notes %}
             <div style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">{{ session.notes }}</div>
+          {% endif %}
+        </div>
+        <div class="score-ring-wrap" title="Score: {{ sc ?? '—' }} · Grade: {{ scGrade }}">
+          {% if sc is not null %}
+            {% set circ = 113 %}
+            {% set dash = ((sc / 100) * circ)|round %}
+            <svg class="score-ring" viewBox="0 0 44 44" aria-label="Score {{ sc }}">
+              <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="3.5"/>
+              <circle cx="22" cy="22" r="18" fill="none" stroke="{{ scColor }}" stroke-width="3.5"
+                stroke-dasharray="{{ circ }}" stroke-dashoffset="{{ circ - dash }}"
+                stroke-linecap="round" transform="rotate(-90 22 22)"/>
+              <text x="22" y="19" text-anchor="middle" font-size="9" font-weight="700" fill="{{ scColor }}" font-family="Space Mono,monospace">{{ sc }}</text>
+              <text x="22" y="29" text-anchor="middle" font-size="8" font-weight="700" fill="{{ scColor }}" font-family="Space Mono,monospace">{{ scGrade }}</text>
+            </svg>
+          {% else %}
+            <svg class="score-ring" viewBox="0 0 44 44" aria-label="No score">
+              <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="3.5"/>
+              <text x="22" y="25" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="Space Mono,monospace">—</text>
+            </svg>
           {% endif %}
         </div>
         <button class="btn btn-danger btn-sm" onclick="deleteSession({{ session.id }})">✕</button>

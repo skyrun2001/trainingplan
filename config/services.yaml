@@ -1,4 +1,5 @@
 parameters:
+    firebase.credentials_path: '%env(resolve:FIREBASE_CREDENTIALS_PATH)%'
 
 services:
     _defaults:
@@ -11,3 +12,7 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    App\Service\FcmService:
+        arguments:
+            $credentialsPath: '%firebase.credentials_path%'

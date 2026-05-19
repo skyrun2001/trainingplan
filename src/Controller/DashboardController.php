@@ -2,11 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\HealthMetric;
 use App\Entity\User;
 use App\Repository\ExerciseLogRepository;
 use App\Repository\HealthMetricRepository;
 use App\Repository\WorkoutSessionRepository;
+use App\Service\HealthMetricService;
+use App\Service\ScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,8 +81,8 @@ class DashboardController extends AbstractController
     /** Manual health entry from the web (no app required) */
     #[Route('/health/save', name: 'health_save', methods: ['POST'])]
     public function saveHealth(
-        Request                $request,
-        HealthMetricRepository $repo,
+        Request             $request,
+        HealthMetricService $healthMetric,
         EntityManagerInterface $em
     ): JsonResponse {
         $user = $this->getUser();
@@ -102,17 +103,7 @@ class DashboardController extends AbstractController
             return $this->json(['error' => 'Keine Metriken angegeben'], 400);
         }
 
-        $saved = [];
-        foreach ($metrics as $rawKey => $rawValue) {
-            $key = substr(preg_replace('/[^a-z0-9_]/', '_', strtolower((string) $rawKey)), 0, 100);
-            if ($key === '' || !is_numeric($rawValue)) continue;
-
-            $record = $repo->findOneByUserDateKey($user, $date, $key)
-                ?? (new HealthMetric())->setUser($user)->setDate($date)->setMetricKey($key);
-            $record->setMetricValue((float) $rawValue);
-            $em->persist($record);
-            $saved[$key] = (float) $rawValue;
-        }
+        $saved = $healthMetric->upsertMetrics($user, $date, $metrics);
         $em->flush();
 
         return $this->json(['success' => true, 'saved' => $saved]);
@@ -191,10 +182,14 @@ class DashboardController extends AbstractController
                 $logs[$key][] = ['set' => $log->getSetNumber(), 'reps' => $log->getReps(),
                                  'weight' => $log->getWeightKg(), 'rpe' => $log->getRpe()];
             }
+            $score = $s->getScore();
             return ['id' => $s->getId(), 'date' => $s->getDate()->format('d.m.Y'),
                     'type' => $s->getType(), 'label' => $s->getTypeLabel(),
                     'color' => $s->getTypeColor(), 'duration' => $s->getDurationMinutes(),
-                    'notes' => $s->getNotes(), 'exercises' => $logs];
+                    'notes' => $s->getNotes(), 'exercises' => $logs,
+                    'score' => $score,
+                    'grade' => $score !== null ? ScoreService::grade($score) : null,
+                    'gradeColor' => $score !== null ? ScoreService::gradeColor($score) : null];
         }, $sessions));
     }
 
