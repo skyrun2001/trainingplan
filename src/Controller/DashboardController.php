@@ -7,6 +7,7 @@ use App\Repository\ExerciseLogRepository;
 use App\Repository\HealthMetricRepository;
 use App\Repository\WorkoutSessionRepository;
 use App\Service\HealthMetricService;
+use App\Service\ScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -181,10 +182,14 @@ class DashboardController extends AbstractController
                 $logs[$key][] = ['set' => $log->getSetNumber(), 'reps' => $log->getReps(),
                                  'weight' => $log->getWeightKg(), 'rpe' => $log->getRpe()];
             }
+            $score = $s->getScore();
             return ['id' => $s->getId(), 'date' => $s->getDate()->format('d.m.Y'),
                     'type' => $s->getType(), 'label' => $s->getTypeLabel(),
                     'color' => $s->getTypeColor(), 'duration' => $s->getDurationMinutes(),
-                    'notes' => $s->getNotes(), 'exercises' => $logs];
+                    'notes' => $s->getNotes(), 'exercises' => $logs,
+                    'score' => $score,
+                    'grade' => $score !== null ? ScoreService::grade($score) : null,
+                    'gradeColor' => $score !== null ? ScoreService::gradeColor($score) : null];
         }, $sessions));
     }
 

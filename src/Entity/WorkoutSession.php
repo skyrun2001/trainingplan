@@ -32,6 +32,9 @@ class WorkoutSession
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $score = null;
+
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'workoutSessions')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
@@ -64,6 +67,9 @@ class WorkoutSession
     public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }
 
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+
+    public function getScore(): ?int { return $this->score; }
+    public function setScore(?int $score): static { $this->score = $score; return $this; }
 
     public function getExerciseLogs(): Collection { return $this->exerciseLogs; }
 

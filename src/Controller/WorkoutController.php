@@ -6,6 +6,7 @@ use App\Entity\ExerciseLog;
 use App\Entity\WorkoutSession;
 use App\Repository\WorkoutSessionRepository;
 use App\Service\DefaultPlanSeeder;
+use App\Service\ScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,7 @@ class WorkoutController extends AbstractController
 {
     public function __construct(
         private readonly DefaultPlanSeeder $seeder,
+        private readonly ScoreService      $scorer,
     ) {}
 
     #[Route('/log', name: 'app_log')]
@@ -83,10 +85,17 @@ class WorkoutController extends AbstractController
             }
         }
 
+        $session->setScore($this->scorer->scoreSession($session));
+
         $em->persist($session);
         $em->flush();
 
-        return $this->json(['id' => $session->getId(), 'success' => true]);
+        return $this->json([
+            'id'      => $session->getId(),
+            'success' => true,
+            'score'   => $session->getScore(),
+            'grade'   => ScoreService::grade($session->getScore()),
+        ]);
     }
 
     #[Route('/log/{id}/delete', name: 'app_log_delete', methods: ['DELETE'])]

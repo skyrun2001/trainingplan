@@ -907,6 +907,10 @@ option { background: #1a1a1a; color: var(--text); }
 .ex-pill { font-size: 11px; padding: 3px 8px; border-radius: 6px;
            background: var(--surface2); color: var(--dim); border: 1px solid var(--border); }
 
+/* ── Score ring ── */
+.score-ring-wrap { flex-shrink: 0; width: 44px; height: 44px; margin-top: 2px; }
+.score-ring      { width: 44px; height: 44px; }
+
 .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
 .empty-state a:not(.btn) { color: var(--text); }
 
