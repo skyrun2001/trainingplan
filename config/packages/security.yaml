@@ -30,7 +30,7 @@ security:
                 default_target_path: app_plan
                 username_parameter: username
                 password_parameter: password
-                enable_csrf: false
+                enable_csrf: true
             login_throttling:
                 max_attempts: 5
                 interval: '15 minutes'

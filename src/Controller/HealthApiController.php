@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\HealthMetric;
 use App\Repository\HealthMetricRepository;
 use App\Repository\WorkoutSessionRepository;
+use App\Service\HealthMetricService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,8 +26,8 @@ class HealthApiController extends AbstractController
      */
     #[Route('/api/health/sync', name: 'api_health_sync', methods: ['POST'])]
     public function sync(
-        Request                $request,
-        HealthMetricRepository $repo,
+        Request             $request,
+        HealthMetricService $healthMetric,
         EntityManagerInterface $em
     ): JsonResponse {
         $user = $this->getUser();
@@ -40,12 +40,10 @@ class HealthApiController extends AbstractController
             return $this->json(['error' => 'Invalid date'], 400);
         }
 
-        // Collect metrics: prefer new "metrics" object, fall back to legacy flat keys
-        $metrics = [];
+        // Prefer new "metrics" object; fall back to legacy flat camelCase keys
         if (isset($data['metrics']) && is_array($data['metrics'])) {
             $metrics = $data['metrics'];
         } else {
-            // Legacy camelCase → snake_case mapping
             $legacyMap = [
                 'steps'         => 'steps',
                 'sleepMinutes'  => 'sleep_minutes',
@@ -53,6 +51,7 @@ class HealthApiController extends AbstractController
                 'weightKg'      => 'weight_kg',
                 'caloriesKcal'  => 'calories_kcal',
             ];
+            $metrics = [];
             foreach ($legacyMap as $camel => $snake) {
                 if (array_key_exists($camel, $data) && $data[$camel] !== null) {
                     $metrics[$snake] = $data[$camel];
@@ -64,22 +63,7 @@ class HealthApiController extends AbstractController
             return $this->json(['error' => 'No metrics provided'], 400);
         }
 
-        $saved = [];
-        foreach ($metrics as $rawKey => $rawValue) {
-            // Normalise key: lowercase, only a-z 0-9 underscore, max 100 chars
-            $key = substr(preg_replace('/[^a-z0-9_]/', '_', strtolower((string) $rawKey)), 0, 100);
-            if ($key === '' || !is_numeric($rawValue)) {
-                continue;
-            }
-            $value = (float) $rawValue;
-
-            $record = $repo->findOneByUserDateKey($user, $date, $key)
-                ?? (new HealthMetric())->setUser($user)->setDate($date)->setMetricKey($key);
-            $record->setMetricValue($value);
-            $em->persist($record);
-            $saved[] = $key;
-        }
-
+        $saved = array_keys($healthMetric->upsertMetrics($user, $date, $metrics));
         $em->flush();
 
         return $this->json(['success' => true, 'saved' => $saved]);
