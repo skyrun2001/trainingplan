@@ -163,11 +163,11 @@ const Suppl = (() => {
         try {
             let res;
             if (id) {
-                res = await apiPatch(`/api/supplements/${id}`, payload);
+                res = await apiPatch(`/supplements/${id}`, payload);
                 const idx = items.findIndex(x => x.id === parseInt(id, 10));
                 if (idx !== -1) items[idx] = res;
             } else {
-                res = await apiPost('/api/supplements', payload);
+                res = await apiPost('/supplements', payload);
                 items.push(res);
             }
             closeModal();
@@ -182,7 +182,7 @@ const Suppl = (() => {
 
     async function logDose(id) {
         try {
-            const res = await apiPost(`/api/supplements/${id}/dose`, {});
+            const res = await apiPost(`/supplements/${id}/dose`, {});
             const idx = items.findIndex(x => x.id === id);
             if (idx !== -1) items[idx] = res;
             render();
@@ -215,7 +215,7 @@ const Suppl = (() => {
         if (!servings || servings <= 0) { showToast('Enter a valid number', true); return; }
 
         try {
-            const res = await apiPost(`/api/supplements/${restockId}/restock`, { servings });
+            const res = await apiPost(`/supplements/${restockId}/restock`, { servings });
             const idx = items.findIndex(x => x.id === restockId);
             if (idx !== -1) items[idx] = res;
             closeRestock();
@@ -234,7 +234,7 @@ const Suppl = (() => {
         if (!confirm(`Delete "${s.name}"?`)) return;
 
         try {
-            await apiDelete(`/api/supplements/${id}`);
+            await apiDelete(`/supplements/${id}`);
             items = items.filter(x => x.id !== id);
             render();
             showToast('Deleted.');
@@ -299,25 +299,24 @@ const Suppl = (() => {
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
-    document.addEventListener('DOMContentLoaded', () => {
-        render();
-
-        // Timing toggle buttons
-        document.querySelectorAll('.timing-btn').forEach(btn => {
-            btn.addEventListener('click', () => btn.classList.toggle('active'));
-        });
-
-        document.getElementById('supplModal')?.addEventListener('click', e => {
-            if (e.target === e.currentTarget) closeModal();
-        });
-        document.getElementById('restockModal')?.addEventListener('click', e => {
-            if (e.target === e.currentTarget) closeRestock();
-        });
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') { closeModal(); closeRestock(); }
-        });
+    // Timing toggle — event delegation on the form so it always works
+    document.getElementById('supplForm')?.addEventListener('click', e => {
+        const btn = e.target.closest('.timing-btn');
+        if (btn) btn.classList.toggle('active');
     });
+
+    document.getElementById('supplModal')?.addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+    document.getElementById('restockModal')?.addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeRestock();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeModal(); closeRestock(); }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => render());
 
     return { openAddModal, openEditModal, closeModal, saveForm, logDose, openRestock, closeRestock, confirmRestock, del };
 })();
