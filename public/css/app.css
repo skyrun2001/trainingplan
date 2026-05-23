@@ -1211,6 +1211,7 @@ option { background: #1a1a1a; color: var(--text); }
     gap: 8px;
     margin-top: 2px;
 }
+.timing-check { display: none; }
 .timing-btn {
     background: var(--surface2);
     border: 1px solid var(--border2);
@@ -1221,10 +1222,11 @@ option { background: #1a1a1a; color: var(--text); }
     padding: 9px 12px;
     cursor: pointer;
     text-align: left;
+    display: block;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 .timing-btn:hover { border-color: rgba(255,255,255,0.22); color: var(--text); }
-.timing-btn.active {
+.timing-btn:has(.timing-check:checked) {
     background: rgba(109,182,255,0.1);
     border-color: var(--accent);
     color: var(--text);
