@@ -34,7 +34,15 @@
       <label class="form-label">Name *</label>
       <input class="form-input" id="fName" maxlength="100" required placeholder="e.g. Creatine">
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label class="form-label">When to take</label>
+      <div class="timing-grid">
+        <button type="button" class="timing-btn" data-timing="morning">🌅 Morning</button>
+        <button type="button" class="timing-btn" data-timing="evening">🌙 Evening</button>
+        <button type="button" class="timing-btn" data-timing="pre_training">⚡ Pre-workout</button>
+        <button type="button" class="timing-btn" data-timing="post_training">✅ Post-workout</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px">
         <div>
           <label class="form-label">Dosage</label>
           <input class="form-input" id="fDosage" maxlength="50" placeholder="5 g">

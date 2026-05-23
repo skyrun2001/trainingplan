@@ -380,6 +380,7 @@ All supplement endpoints require a Bearer token. The supplement object returned 
   "warningDays": 7,
   "notes": "Take with water",
   "sortOrder": 0,
+  "schedule": ["morning", "post_training"],
   "daysRemaining": 27.0,
   "stockPercent": 45.0,
   "stockStatus": "ok",
@@ -427,6 +428,17 @@ Create a supplement.
 ```
 
 Required: `name`. All other fields optional (sensible defaults apply).
+
+**`schedule` values** (array, any combination):
+
+| Value          | Meaning        |
+|----------------|----------------|
+| `morning`      | Morning        |
+| `evening`      | Evening        |
+| `pre_training` | Pre-workout    |
+| `post_training`| Post-workout   |
+
+Unknown values in the array are silently dropped.
 
 **Response 201:** Created supplement object.
 

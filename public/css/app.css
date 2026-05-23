@@ -1202,3 +1202,44 @@ option { background: #1a1a1a; color: var(--text); }
 }
 
 .empty-hint { color: var(--muted); font-size: 14px; grid-column: 1/-1; text-align: center; padding: 40px 0; }
+
+/* ── Supplement timing ────────────────────────────────────────────────────── */
+.timing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 2px;
+}
+.timing-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 9px;
+    color: var(--dim);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 9px 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.timing-btn:hover { border-color: rgba(255,255,255,0.22); color: var(--text); }
+.timing-btn.active {
+    background: rgba(109,182,255,0.1);
+    border-color: var(--accent);
+    color: var(--text);
+}
+
+.suppl-timings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+}
+.suppl-timing-chip {
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 7px;
+    color: var(--dim);
+}
