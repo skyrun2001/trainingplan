@@ -20,7 +20,7 @@ class SupplementController extends AbstractController
     {
         $supplements = $repo->findAllForUser($this->getUser());
 
-        return $this->render('supplement/index.html.twig', [
+        return $this->render('supplement/supplements.html.twig', [
             'supplements'     => $supplements,
             'supplementsJson' => json_encode(
                 array_map(fn($s) => $s->toArray(), $supplements),
