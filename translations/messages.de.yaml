@@ -37,11 +37,12 @@ button:
     track_data: Daten erfassen
     saved:      Gespeichert
     delete_set:     "Satz löschen"
-    add_set:     "+Satz hinzufügen"
+    add_set:     "+ Satz hinzufügen"
     back: Zurück
     day: "+ Tag"
     cancel : "Abbrechen"
     delete_day : "Tag löschen"
+    add: " + hinzufügen"
 
 unit:
     min:   min

@@ -1,0 +1,25 @@
+supplements:
+    page_title: Supplements
+    no_supplements: "No supplements entered yet"
+    add:
+        add_supplement: "Add"
+        name: "Name *"
+        example_name: "e.g., Creatine"
+        morning: "Morning"
+        evening: "Evening"
+        pre_workout: "Pre-Workout"
+        post_workout: "Post-Workout"
+        dosage: "Dosage *"
+        unit_label: "Unit"
+        portions: "Portion"
+        servings_per_day: "Doses per day"
+        remaining: "Remaining doses"
+        pack_size: "Package size"
+        warning_when_label: "Warning when tablets last for how many days"
+        notes: "Notes"
+        when_to_take: "Time of intake"
+
+
+    restock:
+        package_size: "Package size"
+        package_size_subtitle: "Sets both total pack size and remaining servings to this number."

@@ -39,6 +39,7 @@ button:
     delete_set: "Delete set"
     add_set: "Add set"
     back: Back
+    add: " + Add"
 
 unit:
     min:   min

@@ -1,0 +1,26 @@
+supplements:
+    page_title: Supplements
+    no_supplements: "Noch keine Supplemente eingetragen"
+    add:
+        add_supplement: "Hinzufügen"
+        name: "Name *"
+        example_name: "z.B. Kreatin"
+        morning: "Morgens"
+        evening: "Abends"
+        pre_workout: "Pre-Workout"
+        post_workout: "Post-Workout"
+        dosage: "Dosierung *"
+        unit_label: "Einheit"
+        portions: "Portion"
+        servings_per_day: "Dosen pro Tag"
+        remaining: "Übrige Dosen"
+        pack_size: "Verpackungsgröße"
+        warning_when_label: "Warnung, wenn Tabletten noch für wie viele Tage reichen"
+        notes: "Notizen"
+        when_to_take: "Einnahmezeit"
+
+
+    restock:
+        package_size: "Verpackungsgröße"
+        package_size_subtitle: "Sets both total pack size and remaining servings to this number."
+

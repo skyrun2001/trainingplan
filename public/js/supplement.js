@@ -116,7 +116,7 @@ const Suppl = (() => {
         document.getElementById('supplId').value             = s.id;
         document.getElementById('fName').value               = s.name;
         document.getElementById('fDosage').value             = s.dosage || '';
-        document.getElementById('fUnit').value               = s.unit || '';
+        //document.getElementById('fUnit').value               = s.unit || '';
         document.getElementById('fServingsPerDay').value     = s.servingsPerDay;
         document.getElementById('fServingsRemaining').value  = s.servingsRemaining;
         document.getElementById('fTotalServings').value      = s.totalServings;
@@ -135,7 +135,7 @@ const Suppl = (() => {
         document.getElementById('supplId').value            = '';
         document.getElementById('fName').value              = '';
         document.getElementById('fDosage').value            = '';
-        document.getElementById('fUnit').value              = '';
+        //document.getElementById('fUnit').value              = '';
         document.getElementById('fServingsPerDay').value    = '1';
         document.getElementById('fServingsRemaining').value = '0';
         document.getElementById('fTotalServings').value     = '0';
@@ -151,7 +151,7 @@ const Suppl = (() => {
         const payload = {
             name:              document.getElementById('fName').value.trim(),
             dosage:            document.getElementById('fDosage').value.trim() || null,
-            unit:              document.getElementById('fUnit').value.trim() || null,
+            //unit:              document.getElementById('fUnit').value.trim() || null,
             servingsPerDay:    parseInt(document.getElementById('fServingsPerDay').value, 10),
             servingsRemaining: parseFloat(document.getElementById('fServingsRemaining').value),
             totalServings:     parseFloat(document.getElementById('fTotalServings').value),
