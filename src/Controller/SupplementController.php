@@ -15,7 +15,7 @@ class SupplementController extends AbstractController
 {
     // ── Web routes (session auth) ─────────────────────────────────────────────
 
-    #[Route('/supplements', name: 'app_supplements')]
+    #[Route('/supplements', name: 'app_supplements', methods: ['GET'])]
     public function index(SupplementRepository $repo): Response
     {
         $supplements = $repo->findAllForUser($this->getUser());

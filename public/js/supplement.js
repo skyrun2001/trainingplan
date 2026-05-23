@@ -90,12 +90,12 @@ const Suppl = (() => {
     // ── Timing toggle helpers ─────────────────────────────────────────────────
 
     function getSchedule() {
-        return [...document.querySelectorAll('.timing-btn.active')].map(b => b.dataset.timing);
+        return [...document.querySelectorAll('.timing-check:checked')].map(i => i.value);
     }
 
     function setSchedule(arr) {
-        document.querySelectorAll('.timing-btn').forEach(b => {
-            b.classList.toggle('active', arr.includes(b.dataset.timing));
+        document.querySelectorAll('.timing-check').forEach(i => {
+            i.checked = arr.includes(i.value);
         });
     }
 
@@ -141,7 +141,7 @@ const Suppl = (() => {
         document.getElementById('fTotalServings').value     = '0';
         document.getElementById('fWarningDays').value       = '7';
         document.getElementById('fNotes').value             = '';
-        setSchedule([]);
+        document.querySelectorAll('.timing-check').forEach(i => i.checked = false);
     }
 
     async function saveForm(e) {
@@ -298,12 +298,6 @@ const Suppl = (() => {
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
-
-    // Timing toggle — event delegation on the form so it always works
-    document.getElementById('supplForm')?.addEventListener('click', e => {
-        const btn = e.target.closest('.timing-btn');
-        if (btn) btn.classList.toggle('active');
-    });
 
     document.getElementById('supplModal')?.addEventListener('click', e => {
         if (e.target === e.currentTarget) closeModal();
