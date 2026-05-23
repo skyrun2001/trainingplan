@@ -1,5 +1,7 @@
 framework:
     secret: '%env(APP_SECRET)%'
+    assets:
+        version: '%env(ASSETS_VERSION)%'
     default_locale: de
     enabled_locales: [de, en]
     set_locale_from_accept_language: true
