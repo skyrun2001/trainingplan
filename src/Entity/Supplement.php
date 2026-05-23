@@ -52,6 +52,13 @@ class Supplement
     #[ORM\Column]
     private int $sortOrder = 0;
 
+    /**
+     * When to take this supplement.
+     * Valid values: 'morning', 'evening', 'pre_training', 'post_training'
+     */
+    #[ORM\Column(type: Types::JSON)]
+    private array $schedule = [];
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $createdAt;
 
@@ -93,6 +100,14 @@ class Supplement
 
     public function getSortOrder(): int { return $this->sortOrder; }
     public function setSortOrder(int $v): static { $this->sortOrder = $v; return $this; }
+
+    public function getSchedule(): array { return $this->schedule; }
+    public function setSchedule(array $schedule): static
+    {
+        $valid = ['morning', 'evening', 'pre_training', 'post_training'];
+        $this->schedule = array_values(array_intersect($schedule, $valid));
+        return $this;
+    }
 
     public function getCreatedAt(): \DateTimeInterface { return $this->createdAt; }
 
@@ -148,6 +163,7 @@ class Supplement
             'stockStatus'       => $this->stockStatus(),
             'isLow'             => $this->isLow(),
             'isEmpty'           => $this->isEmpty(),
+            'schedule'          => $this->schedule,
         ];
     }
 }

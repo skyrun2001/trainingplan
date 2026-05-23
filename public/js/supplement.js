@@ -7,6 +7,13 @@ const Suppl = (() => {
     let items = (window.PAGE && window.PAGE.supplements) ? [...window.PAGE.supplements] : [];
     let restockId = null;
 
+    const TIMING_META = {
+        morning:      { label: 'Morning',     icon: '🌅' },
+        evening:      { label: 'Evening',     icon: '🌙' },
+        pre_training: { label: 'Pre-workout', icon: '⚡' },
+        post_training:{ label: 'Post-workout',icon: '✅' },
+    };
+
     // ── Render ────────────────────────────────────────────────────────────────
 
     function render() {
@@ -28,17 +35,17 @@ const Suppl = (() => {
         const status = s.stockStatus;  // 'ok' | 'low' | 'empty'
         const badgeClass = status === 'empty' ? 'badge-empty' : status === 'low' ? 'badge-low' : 'badge-ok';
         const badgeText  = status === 'empty' ? 'Empty' : status === 'low' ? 'Low' : 'OK';
+        const barColor   = status === 'empty' ? 'var(--push)' : status === 'low' ? 'var(--warn)' : 'var(--accent)';
+        const daysText   = s.isEmpty ? '—' : s.daysRemaining < 1 ? '< 1 day' : `${s.daysRemaining} days`;
+        const unitLabel  = s.unit || 'servings';
+        const subLine    = s.dosage ? `${s.dosage}${s.unit ? ' · ' + s.unit : ''}` : (s.unit || '');
 
-        const barColor = status === 'empty' ? 'var(--danger)' : status === 'low' ? 'var(--warn)' : 'var(--accent)';
-
-        const daysText = s.isEmpty
-            ? '—'
-            : s.daysRemaining < 1 ? '< 1 day' : `${s.daysRemaining} days`;
-
-        const unitLabel = s.unit || 'servings';
-        const subLine = s.dosage
-            ? `${s.dosage}${s.unit ? ' · ' + s.unit : ''}`
-            : (s.unit || '');
+        const timingHtml = (s.schedule && s.schedule.length)
+            ? `<div class="suppl-timings">${s.schedule.map(t => {
+                const m = TIMING_META[t];
+                return m ? `<span class="suppl-timing-chip">${m.icon} ${m.label}</span>` : '';
+              }).join('')}</div>`
+            : '';
 
         return `
 <div class="suppl-card" data-id="${s.id}">
@@ -46,6 +53,7 @@ const Suppl = (() => {
     <div class="suppl-card-info">
       <div class="suppl-name">${esc(s.name)}</div>
       ${subLine ? `<div class="suppl-sub">${esc(subLine)}</div>` : ''}
+      ${timingHtml}
     </div>
     <span class="suppl-badge ${badgeClass}">${badgeText}</span>
   </div>
@@ -73,13 +81,22 @@ const Suppl = (() => {
         const banner = document.getElementById('lowStockBanner');
         if (!banner) return;
         const low = items.filter(s => s.stockStatus === 'low' || s.stockStatus === 'empty');
-        if (low.length === 0) {
-            banner.style.display = 'none';
-            return;
-        }
+        if (low.length === 0) { banner.style.display = 'none'; return; }
         const names = low.map(s => `<strong>${esc(s.name)}</strong>`).join(', ');
         banner.innerHTML = `⚠ Running low: ${names}`;
         banner.style.display = 'block';
+    }
+
+    // ── Timing toggle helpers ─────────────────────────────────────────────────
+
+    function getSchedule() {
+        return [...document.querySelectorAll('.timing-btn.active')].map(b => b.dataset.timing);
+    }
+
+    function setSchedule(arr) {
+        document.querySelectorAll('.timing-btn').forEach(b => {
+            b.classList.toggle('active', arr.includes(b.dataset.timing));
+        });
     }
 
     // ── Add / Edit modal ──────────────────────────────────────────────────────
@@ -105,6 +122,7 @@ const Suppl = (() => {
         document.getElementById('fTotalServings').value      = s.totalServings;
         document.getElementById('fWarningDays').value        = s.warningDays;
         document.getElementById('fNotes').value              = s.notes || '';
+        setSchedule(s.schedule || []);
         document.getElementById('supplModal').style.display = 'flex';
         document.getElementById('fName').focus();
     }
@@ -114,15 +132,16 @@ const Suppl = (() => {
     }
 
     function resetForm() {
-        document.getElementById('supplId').value             = '';
-        document.getElementById('fName').value               = '';
-        document.getElementById('fDosage').value             = '';
-        document.getElementById('fUnit').value               = '';
-        document.getElementById('fServingsPerDay').value     = '1';
-        document.getElementById('fServingsRemaining').value  = '0';
-        document.getElementById('fTotalServings').value      = '0';
-        document.getElementById('fWarningDays').value        = '7';
-        document.getElementById('fNotes').value              = '';
+        document.getElementById('supplId').value            = '';
+        document.getElementById('fName').value              = '';
+        document.getElementById('fDosage').value            = '';
+        document.getElementById('fUnit').value              = '';
+        document.getElementById('fServingsPerDay').value    = '1';
+        document.getElementById('fServingsRemaining').value = '0';
+        document.getElementById('fTotalServings').value     = '0';
+        document.getElementById('fWarningDays').value       = '7';
+        document.getElementById('fNotes').value             = '';
+        setSchedule([]);
     }
 
     async function saveForm(e) {
@@ -130,14 +149,15 @@ const Suppl = (() => {
         const id = document.getElementById('supplId').value;
 
         const payload = {
-            name:               document.getElementById('fName').value.trim(),
-            dosage:             document.getElementById('fDosage').value.trim() || null,
-            unit:               document.getElementById('fUnit').value.trim() || null,
-            servingsPerDay:     parseInt(document.getElementById('fServingsPerDay').value, 10),
-            servingsRemaining:  parseFloat(document.getElementById('fServingsRemaining').value),
-            totalServings:      parseFloat(document.getElementById('fTotalServings').value),
-            warningDays:        parseInt(document.getElementById('fWarningDays').value, 10),
-            notes:              document.getElementById('fNotes').value.trim() || null,
+            name:              document.getElementById('fName').value.trim(),
+            dosage:            document.getElementById('fDosage').value.trim() || null,
+            unit:              document.getElementById('fUnit').value.trim() || null,
+            servingsPerDay:    parseInt(document.getElementById('fServingsPerDay').value, 10),
+            servingsRemaining: parseFloat(document.getElementById('fServingsRemaining').value),
+            totalServings:     parseFloat(document.getElementById('fTotalServings').value),
+            warningDays:       parseInt(document.getElementById('fWarningDays').value, 10),
+            notes:             document.getElementById('fNotes').value.trim() || null,
+            schedule:          getSchedule(),
         };
 
         try {
@@ -178,8 +198,8 @@ const Suppl = (() => {
         const s = items.find(x => x.id === id);
         if (!s) return;
         restockId = id;
-        document.getElementById('restockName').textContent = s.name;
-        document.getElementById('restockServings').value   = s.totalServings > 0 ? s.totalServings : 60;
+        document.getElementById('restockName').textContent    = s.name;
+        document.getElementById('restockServings').value      = s.totalServings > 0 ? s.totalServings : 60;
         document.getElementById('restockModal').style.display = 'flex';
         document.getElementById('restockServings').focus();
     }
@@ -277,10 +297,15 @@ const Suppl = (() => {
         setTimeout(() => t.classList.remove('show'), 2800);
     }
 
-    // ── Close modals on overlay click ─────────────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────────
 
     document.addEventListener('DOMContentLoaded', () => {
         render();
+
+        // Timing toggle buttons
+        document.querySelectorAll('.timing-btn').forEach(btn => {
+            btn.addEventListener('click', () => btn.classList.toggle('active'));
+        });
 
         document.getElementById('supplModal')?.addEventListener('click', e => {
             if (e.target === e.currentTarget) closeModal();

@@ -191,5 +191,9 @@ class SupplementController extends AbstractController
         if (isset($data['sortOrder'])) {
             $s->setSortOrder((int) $data['sortOrder']);
         }
+        if (array_key_exists('schedule', $data) && is_array($data['schedule'])) {
+            $valid = ['morning', 'evening', 'pre_training', 'post_training'];
+            $s->setSchedule(array_values(array_intersect($data['schedule'], $valid)));
+        }
     }
 }
