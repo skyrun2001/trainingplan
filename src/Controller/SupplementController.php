@@ -29,6 +29,84 @@ class SupplementController extends AbstractController
         ]);
     }
 
+    // ── Web CRUD routes (session auth — called by the browser JS) ────────────
+
+    #[Route('/supplements', name: 'web_supplements_create', methods: ['POST'])]
+    public function webCreate(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+        [$ok, $err] = $this->validatePayload($data, true);
+        if (!$ok) { return $this->json(['error' => $err], 400); }
+
+        $s = new Supplement();
+        $s->setUser($this->getUser());
+        $this->applyPayload($s, $data);
+        $em->persist($s);
+        $em->flush();
+
+        return $this->json($s->toArray(), 201);
+    }
+
+    #[Route('/supplements/{id}', name: 'web_supplements_update', methods: ['PATCH'])]
+    public function webUpdate(int $id, Request $request, SupplementRepository $repo, EntityManagerInterface $em): JsonResponse
+    {
+        $s = $this->findOwned($id, $repo);
+        if ($s === null) { return $this->json(['error' => 'Not found'], 404); }
+
+        $data = json_decode($request->getContent(), true) ?? [];
+        [$ok, $err] = $this->validatePayload($data, false);
+        if (!$ok) { return $this->json(['error' => $err], 400); }
+
+        $this->applyPayload($s, $data);
+        $em->flush();
+
+        return $this->json($s->toArray());
+    }
+
+    #[Route('/supplements/{id}', name: 'web_supplements_delete', methods: ['DELETE'])]
+    public function webDelete(int $id, SupplementRepository $repo, EntityManagerInterface $em): JsonResponse
+    {
+        $s = $this->findOwned($id, $repo);
+        if ($s === null) { return $this->json(['error' => 'Not found'], 404); }
+
+        $em->remove($s);
+        $em->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/supplements/{id}/dose', name: 'web_supplements_dose', methods: ['POST'])]
+    public function webDose(int $id, Request $request, SupplementRepository $repo, EntityManagerInterface $em): JsonResponse
+    {
+        $s = $this->findOwned($id, $repo);
+        if ($s === null) { return $this->json(['error' => 'Not found'], 404); }
+
+        $data   = json_decode($request->getContent(), true) ?? [];
+        $amount = isset($data['amount']) ? max(0.0, (float) $data['amount']) : (float) $s->getServingsPerDay();
+        $s->setServingsRemaining($s->getServingsRemaining() - $amount);
+        $em->flush();
+
+        return $this->json($s->toArray());
+    }
+
+    #[Route('/supplements/{id}/restock', name: 'web_supplements_restock', methods: ['POST'])]
+    public function webRestock(int $id, Request $request, SupplementRepository $repo, EntityManagerInterface $em): JsonResponse
+    {
+        $s = $this->findOwned($id, $repo);
+        if ($s === null) { return $this->json(['error' => 'Not found'], 404); }
+
+        $data = json_decode($request->getContent(), true) ?? [];
+        if (!isset($data['servings']) || !is_numeric($data['servings']) || (float) $data['servings'] <= 0) {
+            return $this->json(['error' => 'servings must be a positive number'], 400);
+        }
+
+        $s->setTotalServings((float) $data['servings']);
+        $s->setServingsRemaining((float) $data['servings']);
+        $em->flush();
+
+        return $this->json($s->toArray());
+    }
+
     // ── API routes (Bearer token auth — handled by api firewall) ─────────────
 
     /** List all supplements. */
