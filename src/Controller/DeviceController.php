@@ -28,8 +28,8 @@ class DeviceController extends AbstractController
         $platform = in_array($data['platform'] ?? '', ['android', 'ios'], true)
             ? $data['platform'] : 'android';
 
-        if ($token === '') {
-            return $this->json(['error' => 'token is required'], 400);
+        if ($token === '' || mb_strlen($token) > 255) {
+            return $this->json(['error' => 'token is required (max 255 chars)'], 400);
         }
 
         $user     = $this->getUser();

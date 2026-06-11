@@ -27,8 +27,13 @@ class LocaleController extends AbstractController
             $em->flush();
         }
 
-        $referer = $request->headers->get('Referer', $this->generateUrl('app_dashboard'));
+        // Only follow same-host referers — a foreign Referer would be an open redirect
+        $referer = $request->headers->get('Referer', '');
+        $parts   = parse_url($referer);
+        $sameHost = $parts !== false
+            && in_array($parts['scheme'] ?? '', ['http', 'https'], true)
+            && ($parts['host'] ?? '') === $request->getHost();
 
-        return $this->redirect($referer);
+        return $this->redirect($sameHost ? $referer : $this->generateUrl('app_dashboard'));
     }
 }

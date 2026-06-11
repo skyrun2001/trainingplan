@@ -50,6 +50,6 @@ class ApiAuthController extends AbstractController
         $em->persist($token);
         $em->flush();
 
-        return $this->json(['token' => $token->getToken(), 'username' => $user->getUsername()]);
+        return $this->json(['token' => $token->getPlainToken(), 'username' => $user->getUsername()]);
     }
 }

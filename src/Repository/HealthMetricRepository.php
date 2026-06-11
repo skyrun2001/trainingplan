@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\HealthMetric;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 
 class HealthMetricRepository extends ServiceEntityRepository
@@ -27,7 +28,8 @@ class HealthMetricRepository extends ServiceEntityRepository
             ->where('h.user = :user')
             ->andWhere('h.date = :today')
             ->setParameter('user', $user)
-            ->setParameter('today', new \DateTime('today'))
+            // h.date is a DATE column — bind as date, or '...00:00:00' never matches
+            ->setParameter('today', new \DateTime('today'), Types::DATE_MUTABLE)
             ->getQuery()
             ->getArrayResult();
 
@@ -49,7 +51,7 @@ class HealthMetricRepository extends ServiceEntityRepository
             ->where('h.user = :user')
             ->andWhere('h.date >= :start')
             ->setParameter('user', $user)
-            ->setParameter('start', new \DateTime("-{$days} days"))
+            ->setParameter('start', new \DateTime("-{$days} days"), Types::DATE_MUTABLE)
             ->orderBy('h.date', 'ASC')
             ->addOrderBy('h.metricKey', 'ASC')
             ->getQuery()

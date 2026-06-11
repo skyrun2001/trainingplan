@@ -347,9 +347,9 @@
 {% set _today = weekDays|filter(d => d.isToday)|first|default(null) %}
 <script>
 window.PAGE = {
-  todayMetrics:       {{ todayMetrics|json_encode|raw }},
-  availableKeys:      {{ availableKeys|json_encode|raw }},
-  healthDashboard:    {{ healthDashboard|json_encode|raw }},
+  todayMetrics:       {{ todayMetrics|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP'))|raw }},
+  availableKeys:      {{ availableKeys|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP'))|raw }},
+  healthDashboard:    {{ healthDashboard|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP'))|raw }},
   healthChartJson:    {{ healthChartJson|raw }},
   todayScheduledType: {{ (_today ? _today.scheduledType|default('') : '')|json_encode }},
   todayHasSessions:   {{ (_today and _today.hasSessions) ? 'true' : 'false' }},
@@ -365,7 +365,7 @@ window.PAGE = {
     vo2_max:            'overall.vo2_max'|trans({}, 'messages'),
     chart_weight:       'overall.chart_weight'|trans({}, 'messages'),
     chart_reps:         'overall.chart_reps'|trans({}, 'messages'),
-  }|json_encode|raw }},
+  }|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP'))|raw }},
 };
 </script>
 <script src="{{ asset('js/dashboard.js') }}"></script>

@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Security;
 
 use App\Repository\ApiTokenRepository;
 use App\Security\ApiTokenAuthenticator;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +19,8 @@ class ApiTokenAuthenticatorTest extends TestCase
     protected function setUp(): void
     {
         $repo = $this->createMock(ApiTokenRepository::class);
-        $this->authenticator = new ApiTokenAuthenticator($repo);
+        $em   = $this->createMock(EntityManagerInterface::class);
+        $this->authenticator = new ApiTokenAuthenticator($repo, $em);
     }
 
     public function testSupportsTrueWithBearerToken(): void
